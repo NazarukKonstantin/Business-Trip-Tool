@@ -1,0 +1,5 @@
+﻿  sha256.cpp
+  Accounts.cpp
+  main.cpp
+E:\Business-Trip-Tool\Business-Trip-Tool\main.cpp(7,10): fatal error C1083: Не удается открыть файл включение: sha256.h: No such file or directory,
+  Создание кода...
