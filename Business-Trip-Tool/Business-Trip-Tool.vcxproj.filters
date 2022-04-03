@@ -24,7 +24,13 @@
     <ClCompile Include="Accounts.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\sha256.cpp">
+    <ClCompile Include="sha256.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Common_Tools.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Options.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +41,13 @@
     <ClInclude Include="Accounts.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\sha256.h">
+    <ClInclude Include="sha256.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Common_Tools.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Options.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

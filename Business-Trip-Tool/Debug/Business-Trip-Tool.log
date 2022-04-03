@@ -1,5 +1,5 @@
-﻿  sha256.cpp
-  Accounts.cpp
-  main.cpp
-E:\Business-Trip-Tool\Business-Trip-Tool\main.cpp(7,10): fatal error C1083: Не удается открыть файл включение: sha256.h: No such file or directory,
+﻿  Accounts.cpp
+E:\Business-Trip-Tool\Business-Trip-Tool\Accounts.cpp(136,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+  Hogwarts_Degree.cpp
   Создание кода...
+  Business-Trip-Tool.vcxproj -> E:\Business-Trip-Tool\Business-Trip-Tool\Debug\Business-Trip-Tool.exe
