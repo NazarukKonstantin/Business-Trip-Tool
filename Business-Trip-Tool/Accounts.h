@@ -5,6 +5,7 @@
 #include <string>
 #include <iterator>
 #include <fstream>
+#include <conio.h>
 #include <ctime>
 #include "sha256.h"
 #include "Common_Tools.h"
@@ -29,7 +30,11 @@ const string NO_ACCOUNTS_CASE = "Ваш аккаунт - первый в системе.\nВы получили пр
 Логин и пароль можно изменить в соответствующем пункте меню.\n";
 const string SIGN_UP_OR_LOG_IN ="1. Зарегестрироваться\n2.Войти\n0.Выход\n";
 const string LOGIN_REQUEST = "Введите логин: ";
+const string LOGIN_SIZE_EXCEEDED = "Ваш логин слишком длинный. Пожалуйста, попробуйте ещё раз.\n";
 const string PASSWORD_REQUEST = "Введите пароль: ";
+const string WAIT_4_CONFIRMATION = "Ваш аккаунт зарегестрирован в системе.\nОжидайте получения доступа\
+ к системе от администратора для дальнейших действий.\n";
+const string BAN_CONDITION = "Ваш аккаунт заблокирован. Для разблокировки обратитесь к администратору\n";
 
 const string EXISTING_LOGIN_ERROR = "Такой логин уже существует. Пожалуйста, введите другой: ";
 const string WEAK_PASSWORD = "Ваш пароль слишком слаб, безопасный пароль должен содержать от 8 до 16 символов,\n\
@@ -39,7 +44,9 @@ const string PASSWORD_CONFIRMATION = "Вы подтверждаете пароль ?\n\
 (В дальнейшем можно изменить пароль в соответствующем пункте меню)\n1.Да\n2.Нет\n";
 
 const string WRONG_ENTER = "Неверный логин или пароль. Попробуйте ещё раз.\n";
+const string GO_BACK_QUESTION = "Хотите вернуться назад?\n1.Да\n2.Нет\n";
 
+const string TABLE_HEADER = "|-------|ЛОГИН|-------|-------|РОЛЬ|-------|-------|ДОСТУП|-------|\n";
 const string ROLE = "Установите роль этого аккаунта:\n1.Администратор;\n2.Пользователь.\n";
 const string ACCESS = "Разрешить доступ данного аккаунта к системе?\n1.Да;\n2.Нет.\n";
 
@@ -53,37 +60,44 @@ const string DONT_CHANGE_YOUR_ACCESS = "Извините, вы не можете изменить свой уро
 
 //---------Числовые константы---------------
 const int SALT_SIZE = 16;					// кол-во символов в соли
-const int SYMBOLS_SIZE = 62;				// количество символов для генерации соли
+const int SYMBOLS_SIZE = 64;				// количество символов для генерации соли
 const int SAFE_PASSWORD_LENGTH_LEFT = 8;	// левая граница безопасной длины пароля
 const int SAFE_PASSWORD_LENGTH_RIGTH = 16;	// правая граница безопасной длины пароля
 const int ALPHABET_AMOUNT = 26;				// кол-во букв в англ. алфавите, вынесенное в константу
+const int LOGIN_LENGTH_LIMIT = 21;
+const int ROLE_LENGTH = 20;
+const int ACCESS_LENGTH = 22;
 
 //---------Функции начала программы-------------------------------------
-void showOptionsOnEnter(vector<Account>acc);							// отображает вариант регистрации и входа при запуске программы
-void proceedPickedOption(vector<Account>acc);							// принимает выбор пользователя и вызывает ф-ции входа и регистрации соответственно
+void showOptionsOnEnter(vector<Account>acc, Account& guest);							// отображает вариант регистрации и входа при запуске программы
+void proceedPickedOption(vector<Account>acc, Account& guest);							// принимает выбор пользователя и вызывает ф-ции входа и регистрации соответственно
 void setDefaultAccount();												// создаёт аккаунт Login: Admin; Password: Admin; если файл аккаунтов не существует
 //---------Функции регистрации--------------------------------------------------------------
-void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc));							// выполняет команды и вызывает ф-ции, непосредственно связанные с регистрацией в систему
+void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& guest);			// выполняет команды и вызывает ф-ции, непосредственно связанные с регистрацией в систему
 bool isLoginUnique (vector<Account>acc, string input_login);								// проверяет логин на уникальность
 bool isPasswordStrong(string input_password,int password_length);							//проверяет пароль на безопасность
 string generateSalt();																		//генеруирует соль
 string getSymbols4Salt();																	//создаёт набор символов, из которых генерируется соль
 string makePasswordHashedAndSalty(string input_password, string salt);						// хэширует пароль с солью
 void request4confirmation(string& input_password, bool& flag, int password_length);			//запрос на подтверждение/изменение пользователем слабого пароля
+bool wantToGoBack();
 //---------Функции входа в систему--------------------------
-void logIn(vector<Account>acc);								// выполняет команды и вызывает ф-ции, непосредственно связанные со входом в систему, где данный аккаунт зарегестрирован
-bool isPasswordCorrect(vector<Account>acc, Account guest);	// проверяет правильность введённого пароля
+void logIn(vector<Account>acc, Account& guest);								// выполняет команды и вызывает ф-ции, непосредственно связанные со входом в систему, где данный аккаунт зарегестрирован
+bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password);	// проверяет правильность введённого пароля
+bool doesAccountHaveAccess(Account temp);
+bool isLogInSuccessful(Account temp);
 //---------Функции опций администратора и пользователя--------------------------------------------------
 void showAccountArray(vector<Account> acc);																// опция админа по просмотру аккаунтов
+void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, string& temp_access);
 void addAccountInArray(vector<Account> acc, Account& new_acc);											// опция админа по добавлению аккаунта
 void pickAccountInArray(vector<Account> acc,void (*changeAccount)(vector<Account>acc, int acc_num));	// позволяет админу выбрать аккаунт для редактирования
 void editAccountInArray(vector<Account> acc, int acc_num);												// опция админа по редактированию аккаунта
-void searchAccount(vector<Account>&acc,int& counter);													// поиск и вывод на экран похожих на введённый аккаунтов
+void searchAccount(vector<Account>&acc);													// поиск и вывод на экран похожих на введённый аккаунтов
 void deleteAccountInArray(vector<Account> acc, int acc_num);											// опция админа по удалению аккаунта
-void changeLogin(vector<Account> acc);																	// опция пользователя и админа по смене логина и пароля
+void changeLogin(vector<Account> acc, Account& guest);																	// опция пользователя и админа по смене логина и пароля
 //---------Функции работы с файлом аккаунтов------------------------------------------------
 void readAccountFile(vector<Account> acc);													// считывает данные из файла аккаунтов
-int countStructuresInFile();																// считает кол-во структур/аккаунтов в файле
+int countStructuresInAccountFile();																// считает кол-во структур/аккаунтов в файле
 void writeEndAccountFile(Account new_account, void (*roleCase)(Account& new_acc));			// записывает данные нового аккаунта в конец файла аккаунтов
 void writeAccountFile(vector<Account> acc);													// записывает данные изменённого массива аккаунтов в файл
 void adminCase(Account& new_acc);															// присваивает аккаунту роль админа

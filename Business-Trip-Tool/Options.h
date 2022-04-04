@@ -1,1 +1,54 @@
 #pragma once
+
+#include "Accounts.h"
+
+struct Trip_Man
+{
+	string surname;
+	string name;
+	string patronymic;
+	int year = 0;
+	string month;
+	int trip_length=0;
+	string town;
+	int money_per_day = 0;
+};
+
+const string TRIP_INFO = "trip_data.txt";
+
+const string NO_FILE_ACCESS = "Файл пуст или недоступен для чтения. Выберите дальнейшее действие:\n1.Вписать данные.\n2.Выйти из программы\n";
+
+const string ENTER_SURNAME="Введите фамилию работника:\n";
+const string ENTER_NAME="Введите имя работника:\n";
+const string ENTER_PATRONYMIC="Введите отчество работника(если у работника нет отчества, введите \"No\")\n";
+const string ENTER_YEAR="Введите год командировки:\n";
+const string ENTER_MONTH="Введите месяц командировки:\n";
+const string ENTER_TOWN="Введите город назначения командировки:\n";
+const string ENTER_DAYS="Введите количество (только число) выделенных на командировку дней:\n";
+const string ENTER_MONEY="Введите количество (только число) выделенной суммы в расчёте на день:\n";
+
+const string WANT_STOP = "Желаете остановиться?\n1.Да\n2.Нет\n";
+
+const string ACCOUNT_MENU_ROLE_0 = "1.Изменить свой логин и пароль;\n0.Выйти в главное меню\n";
+const string TRIP_MENU_ROLE_0 = "1.Просмотреть все командировочные данные;\n2.Определить общие выплаты командировочных за месяц Х (вводится с клавиатуры);\n\
+3.Вывести список наиболее часто посещаемых городов с месяца X по месяц Y (значения X и Y вводятся с клавиатуры);\n4.Найти данные;\n5.Отсортировать данные;\n\
+0.Выйти в главное меню\n";
+const string MAIN_MENU = "1.Работа с аккаунтами;\n2.Работа с командировочными данными;\n0.Выход\n";
+const string ACCOUNT_MENU_ROLE_1 = "1.Просмотреть все учётные записи;\n2.Добавить учётную запись;\n3.Изменить учётную запись;\n4.Удалить учётную запись;\n\
+5.Изменить свой логин и пароль;\n0.Выйти в главное меню\n";
+const string TRIP_MENU_ROLE_1 = "1.Просмотреть все командировочные данные;\n2.Изменить данные;\n3.Определить общие выплаты командировочных за месяц Х\
+(вводится с клавиатуры);\n4.Вывести список наиболее часто посещаемых городов с месяца X по месяц Y (значения X и Y вводятся с клавиатуры);\n\
+5.Найти данные;\n6.Отсортировать данные;\n0.Выйти в главное меню\n";
+const string DATA_CHANGE_MENU_ROLE_1 = "1.Добавить запись;\n2.Изменить запись;\n3.Удалить запись;\n0.Выйти в меню работы с командировочными данными\n";
+
+bool canUserContinue(Account& guest);
+
+void checkPatronymic(Trip_Man& temp);
+
+void processTripFile(vector <Trip_Man>& emp,bool is_file_open, bool& exit_token);
+void readTripFile(vector <Trip_Man> emp, bool& is_file_open);
+int countStructuresInTripFile(bool& is_file_open);
+void writeTripFile(vector<Trip_Man> emp);
+void writeEndTripFile(Trip_Man new_emp);
+
+void processMenu(Account guest);

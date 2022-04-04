@@ -1,18 +1,18 @@
 #include "Accounts.h"
 
-void showOptionsOnEnter(vector<Account>acc)
+void showOptionsOnEnter(vector<Account>acc, Account& guest)
 {
 	cout << SIGN_UP_OR_LOG_IN;
-	proceedPickedOption(acc);
+	proceedPickedOption(acc,guest);
 }
-void proceedPickedOption(vector<Account>acc)
+void proceedPickedOption(vector<Account>acc, Account& guest)
 {
 	int choice = 0;
 	cin >> choice;
 	switch (choice)
 	{
-	case 1: signUp(acc); break;
-	case 2: logIn(acc); break;
+	case 1: signUp(acc,newAccCase, guest); break;
+	case 2: logIn(acc, guest); break;
 	case 0: break;
 	}
 }
@@ -23,20 +23,33 @@ void setDefaultAccount()
 	string input_password = "Admin";
 	def.salt = generateSalt();
 	def.hashed_salty_password = makePasswordHashedAndSalty(input_password, def.salt);
-	def.role = 1;
-	def.access = 1;
-	writeEndAccountFile(def,newAccCase);
+	writeEndAccountFile(def,adminCase);
 }
 
 
-void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc))
+void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& guest)
 {
 	cout << LOGIN_REQUEST;
 	Account new_acc;
 	getline(cin,new_acc.login);
+	while (new_acc.login.size() > LOGIN_LENGTH_LIMIT)
+	{
+		cout << LOGIN_SIZE_EXCEEDED;
+		if (wantToGoBack())
+		{
+			showOptionsOnEnter(acc, guest);
+			return;
+		}
+		getline(cin, new_acc.login);
+	}
 	while (!isLoginUnique(acc,new_acc.login))
 	{
 		cout << EXISTING_LOGIN_ERROR;
+		if (wantToGoBack())
+		{
+			showOptionsOnEnter(acc, guest);
+			return;
+		}
 		getline(cin,new_acc.login);
 	}
 	cout << PASSWORD_REQUEST;
@@ -78,10 +91,10 @@ bool isLoginUnique(vector<Account>acc, string input_login)
 	{
 		if (acc[current_account].login == input_login)
 		{
-			return true;
+			return false;
 		}
 	}
-	return false;
+	return true;
 }
 bool isPasswordStrong(string input_password, int password_length)
 {
@@ -133,7 +146,7 @@ bool isPasswordStrong(string input_password, int password_length)
 }
 string generateSalt()
 {
-	string symbols_set = getSymbols4Salt();							// собирает набор символов для генерации соли
+	string symbols_set = getSymbols4Salt();							// набор символов для генерации соли
 	srand(time(NULL));
 
 	string salt;
@@ -141,7 +154,7 @@ string generateSalt()
 
 	for (int i = 0; i < SALT_SIZE; i++)
 	{
-		salt.push_back(symbols_set[rand() % SYMBOLS_SIZE]);			//добавляет в строку соли случайный символ из ранее отобранных
+		salt.push_back(symbols_set[rand() % SYMBOLS_SIZE]);			// добавляет в строку соли случайный символ из ранее отобранных
 	}
 	return salt;
 }
@@ -166,14 +179,29 @@ string makePasswordHashedAndSalty(string input_password, string salt)
 {
 	return sha256(sha256(input_password + salt) + sha256(input_password));
 }
+bool doesAccountHaveAccess(Account temp)
+{
+	return temp.access == true;
+}
+bool isLogInSuccessful(Account temp)
+{
+	return temp.active == true;
+}
 
-void logIn(vector<Account>acc)
+void logIn(vector<Account>acc, Account& guest)
 {
 	bool flag = true;
 	do
 	{
+		if (wantToGoBack())
+		{
+			if (!guest.access)
+			{
+				showOptionsOnEnter(acc, guest);
+			}
+			break;
+		}
 		cout << LOGIN_REQUEST;
-		Account guest;
 		getline(cin, guest.login);
 		cout << PASSWORD_REQUEST;
 		string input_password;
@@ -183,9 +211,7 @@ void logIn(vector<Account>acc)
 			cout << WRONG_ENTER;
 			continue;
 		}
-		string salt = generateSalt();
-		guest.hashed_salty_password = makePasswordHashedAndSalty(input_password, salt);
-		if (!isPasswordCorrect(acc, guest))
+		if (!isPasswordCorrect(acc, guest, input_password))
 		{
 			cout << WRONG_ENTER;
 			continue;
@@ -193,13 +219,17 @@ void logIn(vector<Account>acc)
 		guest.active = true;
 	} while (!flag);
 }
-bool isPasswordCorrect(vector<Account>acc, Account guest)
+bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password)
 {
 	int vec_size = acc.size();
 	for (int current_account = 0; current_account < vec_size; current_account++)
 	{
-		if (acc[current_account].hashed_salty_password == guest.hashed_salty_password)
+		if (makePasswordHashedAndSalty(input_password,acc[current_account].salt) == acc[current_account].hashed_salty_password)
 		{
+			guest.hashed_salty_password = acc[current_account].hashed_salty_password;
+			guest.salt = acc[current_account].salt;
+			guest.role = acc[current_account].role;
+			guest.access = acc[current_account].access;
 			return true;
 		}
 	}
@@ -208,9 +238,39 @@ bool isPasswordCorrect(vector<Account>acc, Account guest)
 
 void showAccountArray(vector<Account>acc)
 {
-	for (vector<Account>::iterator it = acc.begin(); it != acc.end(); it++)
+	int vec_size = acc.size();
+	string temp_role, temp_access;
+	cout << TABLE_HEADER;
+	for (int curr_acc = 0; curr_acc < vec_size; curr_acc++)
 	{
-		cout<<"|"<< it->login << "|" << it->role << "|" << it->access<<"|\n";
+		roleAccessConverter(acc, curr_acc,temp_role,temp_access);
+		string temp_4_login(LOGIN_LENGTH_LIMIT - acc[curr_acc].login.size(), ' ');
+		string role_length(ROLE_LENGTH - temp_role.size(), ' ');
+		string access_length(ACCESS_LENGTH - temp_access.size(), ' ');
+		cout << "|" << acc[curr_acc].login << temp_4_login << "|" << temp_role << role_length << "|" << temp_access << access_length << "|\n";
+	}
+}
+void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, string& temp_access)
+{
+	if (acc[curr_acc].role)
+	{
+		temp_role = "Администратор";
+	}
+	else
+	{
+		temp_role = "Пользователь";
+	}
+	if (acc[curr_acc].access)
+	{
+		temp_access = "Разрешён";
+	}
+	else if (!acc[curr_acc].access && !acc[curr_acc].active)
+	{
+		temp_access = "Ожидает подтверждения";
+	}
+	else
+	{
+		temp_access = "Запрещён";
 	}
 }
 void addAccountInArray(vector<Account> acc, Account& new_acc)
@@ -227,7 +287,7 @@ void addAccountInArray(vector<Account> acc, Account& new_acc)
 void pickAccountInArray(vector<Account> acc, void (*changeAccount)(vector<Account>acc,int acc_num))
 {
 	int counter = 0;
-	searchAccount(acc, counter);
+	searchAccount(acc);
 	cout << CHOOSE_TO_EDIT;
 	int choice = 0;
 	cin >> choice;
@@ -254,9 +314,9 @@ void editAccountInArray(vector<Account> acc, int acc_num)
 	int choice = 0;
 	cin >> choice;
 	cout << YOU_SURE;
-	int sure = 0;
-	cin >> sure;
-	if (sure == 1)
+	char sure;
+	sure = _getch();
+	if (sure == '1')
 	{
 		switch (choice)
 		{
@@ -290,13 +350,14 @@ void editAccountInArray(vector<Account> acc, int acc_num)
 	}
 	writeAccountFile(acc);
 }
-void searchAccount(vector<Account>& acc,int& counter)
+void searchAccount(vector<Account>& acc)
 {
 	cout << TO_EDIT;
-	string search_to_edit;
+	string search_to_edit, temp_role, temp_access;
 	getline(cin, search_to_edit);
 	int amount_of_accounts = acc.size();
 	int search_size = search_to_edit.size();
+	cout <<"--№--|"<< TABLE_HEADER;
 	for (int current_account = 0; current_account < amount_of_accounts; current_account++)
 	{
 		for (int current_letter = 0; current_letter < search_size; current_letter++)
@@ -305,56 +366,72 @@ void searchAccount(vector<Account>& acc,int& counter)
 			{
 				break;
 			}
-			cout <<acc[current_account].search_counter++<< " |" << acc[current_account].login << "|" << acc[current_account].role 
-				<< "|" << acc[current_account].access << "|\n";
+			roleAccessConverter(acc, current_account, temp_role, temp_access);
+			string temp_4_login(LOGIN_LENGTH_LIMIT - acc[current_account].login.size(), ' ');
+			string role_length(ROLE_LENGTH - temp_role.size(), ' ');
+			string access_length(ACCESS_LENGTH - temp_access.size(), ' ');
+			string counter_length(5 - to_string(acc[current_account].search_counter).size(), ' ');
+			cout <<counter_length<<acc[current_account].search_counter++ << "|" << acc[current_account].login << temp_4_login << "|" <<
+				temp_role << role_length << "|" << temp_access << access_length << "|\n";
 		}
 	}
 }
 void deleteAccountInArray(vector<Account> acc,int acc_num)
 {
 	cout << YOU_SURE;
-	int sure = 0;
-	cin >> sure;
-	if (sure == 1)
+	char sure;
+	sure = _getch();
+	if (sure == '1')
 	{
 		acc.erase(acc.begin() + acc_num);
 	}
 	writeAccountFile(acc);
 }
-void changeLogin(vector<Account> acc)
+void changeLogin(vector<Account> acc, Account& guest)
 {
-	logIn(acc);
+	logIn(acc, guest);
 	int vec_size = acc.size();
 	for (int curr_acc = 0; curr_acc < vec_size; curr_acc++)
 	{
 		if (acc[curr_acc].active == 1)
 		{
 			cout << YOU_SURE;
-			int sure = 0;
-			cin >> sure;
-			if (sure == 1)
+			char sure;
+			sure = _getch();
+			if (sure == '1')
 			{
 				if (acc[curr_acc].role == 1)
 				{
 					deleteAccountInArray(acc, curr_acc);
-					signUp(acc,adminCase);
+					signUp(acc, adminCase,guest);
 					break;
 				}
 				else
 				{
 					deleteAccountInArray(acc, curr_acc);
-					signUp(acc, userCase);
+					signUp(acc, userCase,guest);
 					break;
 				}
-			
+
 			}
 		}
 	}
 }
+bool wantToGoBack()
+{
+	cout << GO_BACK_QUESTION;
+	int choice = 0;
+	cin >> choice;
+	if (choice == 1)
+	{
+		return true;
+	}
+	return false;
+}
 
 void readAccountFile(vector<Account> acc)
 {
-	int amount_of_accounts = countStructuresInFile();
+	int amount_of_accounts = countStructuresInAccountFile();
 	acc.reserve(amount_of_accounts);				// резервируется память под массив аккаунтов
 	ifstream f_in(ACCOUNT_FILE_NAME, ios::in);			//открывает файл в режиме чтения
 	while (!f_in.eof())
@@ -410,7 +487,7 @@ void writeAccountFile(vector<Account> acc)
 	}
 	f_out.close();
 }
-int countStructuresInFile()
+int countStructuresInAccountFile()
 {
 	ifstream f_in(ACCOUNT_FILE_NAME, ios::in);
 	int amount_of_accounts = 0;							//кол-во аккаунтов в массиве, считываемом из файла
