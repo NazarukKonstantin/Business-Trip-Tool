@@ -42,11 +42,11 @@ const string WEAK_PASSWORD = "Ваш пароль слишком слаб, безопасный пароль должен 
 const string TOO_HARD_TO_REMEMBER = "Ваш пароль содержит слишком много символов.\n";
 const string PASSWORD_CONFIRMATION = "Вы подтверждаете пароль ?\n\
 (В дальнейшем можно изменить пароль в соответствующем пункте меню)\n1.Да\n2.Нет\n";
+const string HIDE_OR_SHOW_PASSWORD = "Показывать пароль?\n1.Да;\n2.Нет.\n";
 
 const string WRONG_ENTER = "Неверный логин или пароль. Попробуйте ещё раз.\n";
-const string GO_BACK_QUESTION = "Хотите вернуться назад?\n1.Да\n2.Нет\n";
 
-const string TABLE_HEADER = "|-------|ЛОГИН|-------|-------|РОЛЬ|-------|-------|ДОСТУП|-------|\n";
+const string TABLE_ACCOUNTS_HEADER = "|-------|ЛОГИН|-------|-------|РОЛЬ|-------|-------|ДОСТУП|-------|\n";
 const string ROLE = "Установите роль этого аккаунта:\n1.Администратор;\n2.Пользователь.\n";
 const string ACCESS = "Разрешить доступ данного аккаунта к системе?\n1.Да;\n2.Нет.\n";
 
@@ -79,8 +79,8 @@ bool isPasswordStrong(string input_password,int password_length);							//провер
 string generateSalt();																		//генеруирует соль
 string getSymbols4Salt();																	//создаёт набор символов, из которых генерируется соль
 string makePasswordHashedAndSalty(string input_password, string salt);						// хэширует пароль с солью
+string showOrHidePassword();																// позволяет выбрать: показывать пароль или нет при вводе
 void request4confirmation(string& input_password, bool& flag, int password_length);			//запрос на подтверждение/изменение пользователем слабого пароля
-bool wantToGoBack();
 //---------Функции входа в систему--------------------------
 void logIn(vector<Account>acc, Account& guest);								// выполняет команды и вызывает ф-ции, непосредственно связанные со входом в систему, где данный аккаунт зарегестрирован
 bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password);	// проверяет правильность введённого пароля
@@ -89,17 +89,18 @@ bool isLogInSuccessful(Account temp);
 //---------Функции опций администратора и пользователя--------------------------------------------------
 void showAccountArray(vector<Account> acc);																// опция админа по просмотру аккаунтов
 void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, string& temp_access);
-void addAccountInArray(vector<Account> acc, Account& new_acc);											// опция админа по добавлению аккаунта
-void pickAccountInArray(vector<Account> acc,void (*changeAccount)(vector<Account>acc, int acc_num));	// позволяет админу выбрать аккаунт для редактирования
-void editAccountInArray(vector<Account> acc, int acc_num);												// опция админа по редактированию аккаунта
+void addAccountInArray(vector<Account>& acc, Account& guest);											// опция админа по добавлению аккаунта
+void pickAccountInArray(vector<Account> acc,void (*changeAccount)(vector<Account>&acc, int acc_num));	// позволяет админу выбрать аккаунт для редактирования
+void editAccountInArray(vector<Account>& acc, int acc_num);												// опция админа по редактированию аккаунта
 void searchAccount(vector<Account>&acc);													// поиск и вывод на экран похожих на введённый аккаунтов
-void deleteAccountInArray(vector<Account> acc, int acc_num);											// опция админа по удалению аккаунта
-void changeLogin(vector<Account> acc, Account& guest);																	// опция пользователя и админа по смене логина и пароля
+void deleteAccountInArray(vector<Account>& acc, int acc_num);											// опция админа по удалению аккаунта
+void changeLogin(vector<Account>& acc, Account& guest);																	// опция пользователя и админа по смене логина и пароля
 //---------Функции работы с файлом аккаунтов------------------------------------------------
 void readAccountFile(vector<Account> acc);													// считывает данные из файла аккаунтов
 int countStructuresInAccountFile();																// считает кол-во структур/аккаунтов в файле
 void writeEndAccountFile(Account new_account, void (*roleCase)(Account& new_acc));			// записывает данные нового аккаунта в конец файла аккаунтов
 void writeAccountFile(vector<Account> acc);													// записывает данные изменённого массива аккаунтов в файл
 void adminCase(Account& new_acc);															// присваивает аккаунту роль админа
+void blockedAdminCase(Account& new_acc);
 void userCase(Account& new_acc);															// присваивает аккаунту роль пользователя
 void newAccCase(Account& new_acc);															// присваивает аккаунту роль пользователя, ожидающего подтверждения админа

@@ -21,7 +21,7 @@ int magic()
 		bool is_file_open = true;
 		bool exit_token = false;
 		processTripFile(emp,is_file_open,exit_token);
-		processMenu(guest);
+		processMainMenu(acc,guest);
 		writeTripFile(emp);
 	}
 	writeAccountFile(acc);

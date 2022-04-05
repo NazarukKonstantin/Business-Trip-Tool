@@ -53,8 +53,7 @@ void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& gues
 		getline(cin,new_acc.login);
 	}
 	cout << PASSWORD_REQUEST;
-	string input_password;
-	getline(cin, input_password);
+	string input_password = showOrHidePassword();
 	int password_length = input_password.length();															// считает длину строки
 	bool flag = true;
 	while ((!isPasswordStrong(input_password,password_length)||password_length>SAFE_PASSWORD_LENGTH_RIGTH) && flag)	// условие захода в цикл: небезопасный пароль или пользователь его не подтвердил или пароль слишком длинный
@@ -179,6 +178,25 @@ string makePasswordHashedAndSalty(string input_password, string salt)
 {
 	return sha256(sha256(input_password + salt) + sha256(input_password));
 }
+string showOrHidePassword()
+{
+	string input_password;
+	cout << HIDE_OR_SHOW_PASSWORD;
+	char choice = _getch();
+	switch (choice)
+	{
+	case '1': getline(cin, input_password); break;
+	case '2': 
+		char temp;
+		do
+		{
+			temp = _getch();
+			input_password.push_back(temp);
+			cout << "*";
+		} while (temp != '\r'); cout << endl; break;
+	}
+	return input_password;
+}
 bool doesAccountHaveAccess(Account temp)
 {
 	return temp.access == true;
@@ -240,7 +258,7 @@ void showAccountArray(vector<Account>acc)
 {
 	int vec_size = acc.size();
 	string temp_role, temp_access;
-	cout << TABLE_HEADER;
+	cout << TABLE_ACCOUNTS_HEADER;
 	for (int curr_acc = 0; curr_acc < vec_size; curr_acc++)
 	{
 		roleAccessConverter(acc, curr_acc,temp_role,temp_access);
@@ -273,18 +291,31 @@ void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, s
 		temp_access = "Запрещён";
 	}
 }
-void addAccountInArray(vector<Account> acc, Account& new_acc)
+void addAccountInArray(vector<Account>& acc, Account& guest)
 {
 	cout << ROLE;
 	int role_choice = 0;
 	cin >> role_choice;
 	cout << ACCESS;
 	int access_choice = 0;
-	if (role_choice == 1) { new_acc.role = 1; };
-	if (access_choice == 1) { new_acc.access = 1; };
-	writeAccountFile(acc);
+	if (access_choice == 1 && role_choice == 1)
+	{
+		signUp(acc, adminCase, guest);
+	}
+	else if (access_choice == 2 && role_choice == 1)
+	{
+		signUp(acc, blockedAdminCase, guest);
+	}
+	else if (access_choice == 1 && role_choice == 2)
+	{
+		signUp(acc, userCase, guest);
+	}
+	else if (access_choice == 2 && role_choice == 2)
+	{
+		signUp(acc, newAccCase, guest);
+	}
 }
-void pickAccountInArray(vector<Account> acc, void (*changeAccount)(vector<Account>acc,int acc_num))
+void pickAccountInArray(vector<Account> acc, void (*changeAccount)(vector<Account>&acc,int acc_num))
 {
 	int counter = 0;
 	searchAccount(acc);
@@ -306,7 +337,7 @@ void pickAccountInArray(vector<Account> acc, void (*changeAccount)(vector<Accoun
 		}
 	}
 }
-void editAccountInArray(vector<Account> acc, int acc_num)
+void editAccountInArray(vector<Account>& acc, int acc_num)
 {
 	int access_choice = 0;
 	int role_choice = 0;
@@ -376,7 +407,7 @@ void searchAccount(vector<Account>& acc)
 		}
 	}
 }
-void deleteAccountInArray(vector<Account> acc,int acc_num)
+void deleteAccountInArray(vector<Account>& acc,int acc_num)
 {
 	cout << YOU_SURE;
 	char sure;
@@ -387,7 +418,7 @@ void deleteAccountInArray(vector<Account> acc,int acc_num)
 	}
 	writeAccountFile(acc);
 }
-void changeLogin(vector<Account> acc, Account& guest)
+void changeLogin(vector<Account>& acc, Account& guest)
 {
 	logIn(acc, guest);
 	int vec_size = acc.size();
@@ -416,17 +447,6 @@ void changeLogin(vector<Account> acc, Account& guest)
 			}
 		}
 	}
-}
-bool wantToGoBack()
-{
-	cout << GO_BACK_QUESTION;
-	int choice = 0;
-	cin >> choice;
-	if (choice == 1)
-	{
-		return true;
-	}
-	return false;
 }
 
 void readAccountFile(vector<Account> acc)
@@ -458,6 +478,11 @@ void adminCase(Account& new_acc)
 {
 	new_acc.role = 1;
 	new_acc.access = 1;
+}
+void blockedAdminCase(Account& new_acc)
+{
+	new_acc.role = 1;
+	new_acc.access = 0;
 }
 void userCase(Account& new_acc)
 {
