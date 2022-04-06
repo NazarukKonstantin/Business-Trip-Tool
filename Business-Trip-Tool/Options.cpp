@@ -41,7 +41,9 @@ void enterEmployee(vector <Trip_Man>& emp)
 		temp.trip_length = stoi(tempor_days = check4TooBigString(DAYS_LINE_LIMIT));
 		cout << ENTER_MONEY;
 		string tempor_money;
-		temp.money_per_day = stoi(tempor_money = check4TooBigString(MONEY_LINE_LIMIT));
+		temp.money_per_day = stod(tempor_money = check4TooBigString(MONEY_LINE_LIMIT));
+		cout << ENTER_CURRENCY;
+		temp.currency = check4TooBigString(CURRENCY_LIMIT);
 		cout << ENTER_TOWN;
 		temp.town = check4TooBigString(TOWN_LINE_LIMIT);
 		emp.push_back(temp);
@@ -167,14 +169,14 @@ void writeTripFile(vector<Trip_Man> emp)
 	fout.close();
 }
 
-void processMainMenu(vector<Account>& acc, Account& guest)
+void processMainMenu(vector <Trip_Man>& emp, vector<Account>& acc, Account& guest)
 {
 	cout << MAIN_MENU;
 	char main_menu_choice=_getch();
 	switch (main_menu_choice)
 	{
 	case '1': processAccountMenu(acc,guest);
-	case '2': processTripMenu(guest);
+	case '2': processTripMenu(emp,guest);
 	case '0': return;
 	}
 }
@@ -214,7 +216,7 @@ void processTripMenu(vector<Trip_Man> emp, Account guest)
 		switch (choice)
 		{
 		case '1': showTripArray(emp); break;
-		case '2':
+		case '2': countMoney4MonthX(emp); break;
 		case '3':
 		case '4':
 		case '5':
@@ -252,14 +254,14 @@ void showTripArray(vector<Trip_Man>emp)
 		string year_temp_length(YEAR_LINE_LIMIT-to_string(emp[curr_emp].year).size(), ' ');
 		string month_temp_length(MONTH_LINE_LIMIT-emp[curr_emp].month.size(), ' ');
 		string days_temp_length(DAYS_LINE_LIMIT-to_string(emp[curr_emp].trip_length).size(), ' ');
-		string money_temp_length(MONEY_LINE_LIMIT-to_string(emp[curr_emp].money_per_day).size(), ' ');
+		string money_temp_length(MONEY_LINE_LIMIT+CURRENCY_LIMIT-to_string(emp[curr_emp].money_per_day).size()-emp[curr_emp].currency.size(), ' ');
 		string town_temp_length(TOWN_LINE_LIMIT - emp[curr_emp].town.size(), ' ');
 
 		cout << "|" << emp[curr_emp].surname << surname_temp_length
 			<< "|" << emp[curr_emp].year << year_temp_length
 			<< "|" << emp[curr_emp].month << money_temp_length
 			<< "|" << emp[curr_emp].trip_length << days_temp_length
-			<< "|" << emp[curr_emp].money_per_day << money_temp_length
+			<< "|" << emp[curr_emp].money_per_day <<emp[curr_emp].currency<< money_temp_length
 			<< "|" << emp[curr_emp].town << town_temp_length << endl
 			<< "|" << emp[curr_emp].name << name_temp_length
 			<< "|" << blank_year << "|" << blank_month << "|" << blank_days << "|" << blank_money << "|" << blank_town << endl;
@@ -273,6 +275,54 @@ void showTripArray(vector<Trip_Man>emp)
 		cout << "|" << emp_divider << "|\n";
 	}
 }
+void countMoney4MonthX(vector<Trip_Man> emp)
+{
+	cout << ENTER_MONTH;
+	string input_month;
+	vector<Month_Money> value;
+	Month_Money temp;
+	int amount_of_emp = emp.size();
+	getline(cin, input_month);
+	for (int curr_emp = 0; curr_emp < amount_of_emp; curr_emp++)
+	{
+		if (input_month == emp[curr_emp].month)
+		{
+			temp.money_per_day = emp[curr_emp].money_per_day;
+			temp.currency = emp[curr_emp].currency;
+			value.push_back(temp);
+		}
+	}
+	cout << MONEY_RES << countMoney(value)<<endl;
+}
+string countMoney(vector<Month_Money> value)
+{
+	int currency_sum = 0;
+	string result;
+	int value_size = value.size();
+	for (int curr_mon = 0; curr_mon < value_size-1; curr_mon++)
+	{
+		if (value[curr_mon].unique == true)
+		{
+			value[curr_mon].unique = false;
+			currency_sum = value[curr_mon].money_per_day;
+			for (int next_mon = curr_mon + 1; next_mon < value_size; next_mon++)
+			{
+				if (value[curr_mon].currency == value[next_mon].currency)
+				{
+					currency_sum += value[next_mon].money_per_day;
+					value[next_mon].unique = false;
+				}
+			}
+			result += to_string(currency_sum) + value[curr_mon].currency + " ";
+		}
+	}
+	if (value[value_size-1].unique == true)
+	{
+		result += to_string(value[value_size - 1].money_per_day) + value[value_size - 1].currency;
+	}
+	return result;
+}
+
 
 //void addAccountInArray(vector<Account>& acc, Account& guest)
 //{

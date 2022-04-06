@@ -388,7 +388,7 @@ void searchAccount(vector<Account>& acc)
 	getline(cin, search_to_edit);
 	int amount_of_accounts = acc.size();
 	int search_size = search_to_edit.size();
-	cout <<"--¹--|"<< TABLE_HEADER;
+	cout <<"--¹--|"<< TABLE_ACCOUNTS_HEADER;
 	for (int current_account = 0; current_account < amount_of_accounts; current_account++)
 	{
 		for (int current_letter = 0; current_letter < search_size; current_letter++)
