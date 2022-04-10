@@ -23,10 +23,12 @@ int magic()
 		processTripFile(emp,is_file_open,exit_token);
 		if (!exit_token)
 		{
-			processMainMenu(emp, acc, guest);
-			writeTripFile(emp);
+			do
+			{
+				processMainMenu(emp, acc, guest);
+				writeTripFile(emp);
+			} while (!wantToGoBack());
 		}
 	}
-	writeAccountFile(acc);
 	return 0;
 }
