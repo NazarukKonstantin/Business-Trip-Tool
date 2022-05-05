@@ -3,16 +3,31 @@
 void showOptionsOnEnter(vector<Account>acc, Account& guest)
 {
 	cout << SIGN_UP_OR_LOG_IN;
-	proceedPickedOption(acc,guest);
+	proceedPickedOption(acc, guest);
 }
 void proceedPickedOption(vector<Account>acc, Account& guest)
 {
 	int choice = inputIntNumbers(0, 2);
 	switch (choice)
 	{
-	case 1: signUp(acc,newAccCase, guest); break;
+	case 1: signUp(acc, newAccCase, guest); break;
 	case 2: logIn(acc, guest); break;
 	case 0: break;
+	}
+}
+void showOptionsOnEnter(vector<Account>acc, Account& guest, bool& exit_token)
+{
+	cout << SIGN_UP_OR_LOG_IN;
+	proceedPickedOption(acc,guest,exit_token);
+}
+void proceedPickedOption(vector<Account>acc, Account& guest,bool& exit_token)
+{
+	int choice = inputIntNumbers(0, 2);
+	switch (choice)
+	{
+	case 1: signUp(acc,newAccCase, guest); break;
+	case 2: logIn(acc, guest); break;
+	case 0: exit_token=true;break;
 	}
 }
 void setDefaultAccount()
@@ -178,7 +193,6 @@ string showOrHidePassword()
 	{
 	case 1: input_password=justEnterString(); break;
 	case 2: 
-		clearStream();
 		char temp;
 		getchar();
 		do
@@ -437,13 +451,12 @@ void searchAccount(string& search_to_edit,string message,vector<Account>& acc, i
 			string temp_4_login(LOGIN_LENGTH_LIMIT - acc[current_account].login.size(), ' ');
 			string role_length(ROLE_LENGTH_LIMIT - temp_role.size(), ' ');
 			string access_length(ACCESS_LENGTH_LIMIT - temp_access.size(), ' ');
-			string counter_length(5 - to_string(acc[current_account].search_counter).size(), ' ');
+			string counter_length(COUNTER_LENGTH_LIMIT - to_string(acc[current_account].search_counter).size(), ' ');
 			cout <<counter_length<<acc[current_account].search_counter++ << "|" << acc[current_account].login << temp_4_login << "|" <<
 				temp_role << role_length << "|" << temp_access << access_length << "|\n";
 			counter++;
 		}
 	}
-
 }
 void deleteAccountInArray(vector<Account>& acc,int acc_num)
 {

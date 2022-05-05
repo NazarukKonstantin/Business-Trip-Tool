@@ -1,6 +1,6 @@
 #include "Options.h"
 
-bool canUserContinue(Account& guest)
+bool canUserContinue(Account& guest, bool exit_token)
 {
 	if (doesAccountHaveAccess(guest) && isLogInSuccessful(guest))
 	{
@@ -14,6 +14,7 @@ bool canUserContinue(Account& guest)
 		}
 		else if (!doesAccountHaveAccess(guest) && areYouNew(guest))
 		{
+			if(!exit_token)
 			cout << WAIT_4_CONFIRMATION;
 		}
 	}
@@ -104,7 +105,7 @@ void checkPatronymic(Trip_Man& temp)
 	}
 }
 
-void readTripFile(vector <Trip_Man> emp, bool& is_file_open)
+void readTripFile(vector <Trip_Man>& emp, bool& is_file_open)
 {
 	int amount_of_employees = countStructuresInTripFile(is_file_open);
 	if (is_file_open)
@@ -346,7 +347,6 @@ void sortTowns(vector<Trip_Man> emp)
 	int year_x=0, year_y=0;
 	int X = 0, Y = 0;
 	cout << ENTER_MONTH_X;
-	clearStream();
 	X = enterMonth(ENTER_MONTH_X, month_x);
 	cout << ENTER_YEAR;
 	year_x = inputIntNumbers(YEAR_LINE_LIMIT);
@@ -366,7 +366,7 @@ int enterMonth(string message, string& month)
 	while (true)
 	{
 		cout << message;
-		cin >> month;
+		(cin >> month).get();
 		int str_size = month.size();
 		int counter = 0;
 		for (int curr_symb = 0; curr_symb < str_size; curr_symb++)
@@ -403,18 +403,19 @@ int convertMonthName2Number(string month, int str_size)
 		{
 			month[curr_symb]=tolower(month[curr_symb]);
 		}
+		month[0] = toupper(month[0]);
 		switch (month[0])
 		{
-		case 's': case 'ñ': return 9;
-		case 'o': case 'î': return 10;
-		case 'n': case 'í': return 11;
-		case 'd': case 'ä': return 12;
-		case 'f': case 'ô': return 2;
-		case 'm': case 'ì': switch (month[2]) { case 'r': case'ð': return 3; case'y': case'é': return 5; }
-		case 'a': case 'à': switch (month[1]) { case 'p': case'ï': return 4; case'u': case'â': return 8; }
-		case 'j': switch (month[3]) { case 'u': return 1; case 'e': return 6; case'y': return 7; }
-		case 'ÿ': return 1;
-		case 'è': switch (month[2]) { case'í': return 6; case'ë':return 7; }
+		case 'S': case 'Ñ': return 9;
+		case 'O': case 'Î': return 10;
+		case 'N': case 'Í': return 11;
+		case 'D': case 'Ä': return 12;
+		case 'F': case 'Ô': return 2;
+		case 'M': case 'Ì': switch (month[2]) { case 'r': case'p': return 3; case'ó': case'é': return 5; }
+		case 'A': case 'À': switch (month[1]) { case 'p': case'ï': return 4; case'u': case'â': return 8; }
+		case 'J': switch (month[3]) { case 'u': return 1; case 'e': return 6; case'y': return 7; }
+		case 'ß': return 1;
+		case 'È': switch (month[2]) { case'í': return 6; case'ë':return 7; }
 		default: cout << WRONG_MONTH; return 0;
 		}
 	}
@@ -715,7 +716,12 @@ void inputMonth(Trip_Man& temp)
 }
 void inputDays(Trip_Man& temp)
 {
-	temp.trip_length = inputIntNumbers(DAYS_LINE_LIMIT);
+	switch (temp.month_num)
+	{
+	case 1: case 3: case 5: case 7: case 11: temp.trip_length = inputIntNumbers(1, 31); break;
+	case 4: case 6: case 8: case 12: temp.trip_length = inputIntNumbers(1, 30); break;
+	case 2: ((temp.year-2012)%4==0)? temp.trip_length = inputIntNumbers(1, 29):temp.trip_length = inputIntNumbers(1, 28); break;
+	}
 }
 void inputMoney(Trip_Man& temp)
 {

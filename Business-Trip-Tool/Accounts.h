@@ -13,17 +13,17 @@
 using namespace std;
 struct Account
 {
-	string login;					
-	string hashed_salty_password;							
-	string salt;
-	bool role = false;
-	bool access = false;
-	bool active = false;
-	bool new_acc = true;
-	int search_counter = 1;
-}; //структура содержит инф-цию отдельного аккаунта: логин, хэшированный пароль, соль, статус (пользователь или администратор) и также уровень доступа, определяемый админ-ом
+	string login;
+	string hashed_salty_password;				
+	string salt;					// salt - string of randomly generated symbols, individual 4 each account
+	bool role = false;				// defines account role (0 - registered user or new user, 1 - admin)
+	bool access = false;			// defines account's access level (0 - access denied, 1 - has access)
+	bool active = false;			// defines whether the user logged in or not
+	bool new_acc = true;			// defines if the account is new to system 4 admin to confirm
+	int search_counter = 1;			// necessary for search; is used like indexes for search
+}; //the structure contains the info of individual account
 
-//---------Строковые константы-----------------------
+//---------String constants-----------------------
 const string ACCOUNT_FILE_NAME = "accounts_list.txt";
 
 const string NO_ACCOUNTS_CASE = "Ваш аккаунт - первый в системе.\nВы получили права администратора.\nВаш логин - Admin, ваш пароль - Admin.\n\
@@ -58,54 +58,56 @@ const string DONT_DELETE_YOURSELF = "Извините, но вы не можете удалить свой акка
 const string DONT_CHANGE_YOUR_ROLE = "Извините, вы не можете изменить свою роль";
 const string DONT_CHANGE_YOUR_ACCESS = "Извините, вы не можете изменить свой уровень доступа";
 
-//---------Числовые константы---------------
-const int SALT_SIZE = 16;					// кол-во символов в соли
-const int SYMBOLS_SIZE = 62;				// количество символов для генерации соли
-const int SAFE_PASSWORD_LENGTH_LEFT = 8;	// левая граница безопасной длины пароля
-const int SAFE_PASSWORD_LENGTH_RIGTH = 16;	// правая граница безопасной длины пароля
-const int ALPHABET_AMOUNT = 26;				// кол-во букв в англ. алфавите, вынесенное в константу
-const int LOGIN_LENGTH_LIMIT = 21;
-const int ROLE_LENGTH_LIMIT = 20;
-const int ACCESS_LENGTH_LIMIT = 22;
-const int COUNTER_LENGTH_LIMIT = 5;
+//---------Numeric constants---------------
+const int SALT_SIZE = 16;					// amount of symbols in salt
+const int SYMBOLS_SIZE = 62;				// size of set of symbols 4 salt generation
+const int SAFE_PASSWORD_LENGTH_LEFT = 8;	// min amount of letters 4 safe password
+const int SAFE_PASSWORD_LENGTH_RIGTH = 16;	// max reasonable amount of letters 4 safe password
+const int ALPHABET_AMOUNT = 26;				// amount of letter in English alphabet
+const int LOGIN_LENGTH_LIMIT = 21;			// max login length to fit in the output table 
+const int ROLE_LENGTH_LIMIT = 20;			// max (title of) role length to fit in the output table 
+const int ACCESS_LENGTH_LIMIT = 22;			// max (title of) access level length to fit in the output table 
+const int COUNTER_LENGTH_LIMIT = 5;			// max index length to fit in the output table 
 
-//---------Функции начала программы-------------------------------------
-void showOptionsOnEnter(vector<Account>acc, Account& guest);							// отображает вариант регистрации и входа при запуске программы
-void proceedPickedOption(vector<Account>acc, Account& guest);							// принимает выбор пользователя и вызывает ф-ции входа и регистрации соответственно
-void setDefaultAccount();												// создаёт аккаунт Login: Admin; Password: Admin; если файл аккаунтов не существует
-//---------Функции регистрации--------------------------------------------------------------
-void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& guest);			// выполняет команды и вызывает ф-ции, непосредственно связанные с регистрацией в систему
-bool isLoginUnique (vector<Account>acc, string input_login);								// проверяет логин на уникальность
-bool isPasswordStrong(string input_password,int password_length);							//проверяет пароль на безопасность
-string generateSalt();																		//генеруирует соль
-string getSymbols4Salt();																	//создаёт набор символов, из которых генерируется соль
-string makePasswordHashedAndSalty(string input_password, string salt);						// хэширует пароль с солью
-string showOrHidePassword();																// позволяет выбрать: показывать пароль или нет при вводе
-void request4confirmation(string& input_password, bool& flag, int password_length);			//запрос на подтверждение/изменение пользователем слабого пароля
-//---------Функции входа в систему--------------------------
-void logIn(vector<Account>acc, Account& guest);								// выполняет команды и вызывает ф-ции, непосредственно связанные со входом в систему, где данный аккаунт зарегестрирован
-bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password);	// проверяет правильность введённого пароля
-bool doesAccountHaveAccess(Account temp);
-bool isLogInSuccessful(Account temp);
-bool areYouNew(Account temp);
-//---------Функции опций администратора и пользователя--------------------------------------------------
-void showAccountArray(vector<Account> acc);																// опция админа по просмотру аккаунтов
-void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, string& temp_access);
-void addAccountInArray(vector<Account>& acc, Account& guest);											// опция админа по добавлению аккаунта
-void pickAccountInArray(string message4search, string message, vector<Account>& acc, void (*changeAccount)(vector<Account>& acc, int acc_num));	// позволяет админу выбрать аккаунт для редактирования
-void editAccountMenu(vector<Account>& acc, int acc_num);												// опция админа по редактированию аккаунта
-void editLogin(string login_savespot, vector<Account>& acc, int acc_num);
-void editRole(vector<Account>& acc, int acc_num);
-void editAccess(vector<Account>& acc, int acc_num);
-void searchAccount(string& search_to_edit,string message, vector<Account>& acc, int& counter);													// поиск и вывод на экран похожих на введённый аккаунтов
-void deleteAccountInArray(vector<Account>& acc, int acc_num);											// опция админа по удалению аккаунта
-void changeLogin(vector<Account>& acc, Account& guest);																	// опция пользователя и админа по смене логина и пароля
-//---------Функции работы с файлом аккаунтов------------------------------------------------
-void readAccountFile(vector<Account>&acc);													// считывает данные из файла аккаунтов
-int countStructuresInAccountFile();																// считает кол-во структур/аккаунтов в файле
-void writeEndAccountFile(Account new_account, void (*roleCase)(Account& new_acc));			// записывает данные нового аккаунта в конец файла аккаунтов
-void writeAccountFile(vector<Account> acc);													// записывает данные изменённого массива аккаунтов в файл
-void adminCase(Account& new_acc);															// присваивает аккаунту роль админа
-void blockedAdminCase(Account& new_acc);
-void userCase(Account& new_acc);															// присваивает аккаунту роль пользователя
-void newAccCase(Account& new_acc);															// присваивает аккаунту роль пользователя, ожидающего подтверждения админа
+//---------Program starting functions---------------------------------------------------
+void showOptionsOnEnter(vector<Account>acc, Account& guest);							// shows sign-in/ log-in options
+void proceedPickedOption(vector<Account>acc, Account& guest);							// takes user's choice (sign-in or log-in) and calls appropriate function
+void showOptionsOnEnter(vector<Account>acc, Account& guest, bool& exit_token);			// shows sign-in/ log-in options
+void proceedPickedOption(vector<Account>acc, Account& guest, bool& exit_token);			// takes user's choice (sign-in or log-in) and calls appropriate function
+void setDefaultAccount();																// creates defaulr account (Login: Admin; Password: Admin;) if none exists
+//---------Registration functions-----------------------------------------------------------
+void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& guest);			// executes commands and calls functions connected to registration process
+bool isLoginUnique (vector<Account>acc, string input_login);								// checks if login is unique
+bool isPasswordStrong(string input_password,int password_length);							// checks if password is safe 
+string generateSalt();																		// generates salt
+string getSymbols4Salt();																	// creates symbols set 4 salt generation
+string makePasswordHashedAndSalty(string input_password, string salt);						// hash-function
+string showOrHidePassword();																// password input function (hide or show password while entering)
+void request4confirmation(string& input_password, bool& flag, int password_length);			// reguests 4 user to change a weak password
+//---------Log-in functions---------------------------------------------------------
+void logIn(vector<Account>acc, Account& guest);										// executes commands and calls functions connected to log-in process
+bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password);	// checks if password mathes the one saved in the system
+bool doesAccountHaveAccess(Account temp);											// checks if user got access to keep on working with program
+bool isLogInSuccessful(Account temp);												// checks if log-in process is successful
+bool areYouNew(Account temp);														// checks if a user is new to system and haven't been confirmed by admin yet
+//---------Admin and user options functions-----------------------------------------------------------------------------------------------------
+void showAccountArray(vector<Account> acc);																										// show accounts (4 Admin Only)
+void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, string& temp_access);											// converts role and access numbers (0&1) to words 4 output
+void addAccountInArray(vector<Account>& acc, Account& guest);																					// add account (4 Admin Only)
+void pickAccountInArray(string message4search, string message, vector<Account>& acc, void (*changeAccount)(vector<Account>& acc, int acc_num));	// choose account to edit (4 Admin Only)
+void editAccountMenu(vector<Account>& acc, int acc_num);																						// edit account (4 Admin Only)
+void editLogin(string login_savespot, vector<Account>& acc, int acc_num);																		// change log-in (4 Admin Only)
+void editRole(vector<Account>& acc, int acc_num);																								// change role (4 Admin Only)
+void editAccess(vector<Account>& acc, int acc_num);																								// change access (4 Admin Only)
+void searchAccount(string& search_to_edit,string message, vector<Account>& acc, int& counter);													// searching and showing accounts similar 2 input
+void deleteAccountInArray(vector<Account>& acc, int acc_num);																					// delete account (4 Admin Only)
+void changeLogin(vector<Account>& acc, Account& guest);																							// change ones log-in and password
+//---------File proccessing functions------------------------------------------------
+void readAccountFile(vector<Account>&acc);													// reads account file
+int countStructuresInAccountFile();															// counts amount of structures in file
+void writeEndAccountFile(Account new_account, void (*roleCase)(Account& new_acc));			// adds acccount to the end of file
+void writeAccountFile(vector<Account> acc);													// write account file
+void adminCase(Account& new_acc);															// assign admin role to account
+void blockedAdminCase(Account& new_acc);                                                    // assign admin with access restricted role to account
+void userCase(Account& new_acc);															// assign registered user role to account
+void newAccCase(Account& new_acc);															// assign new user role to account

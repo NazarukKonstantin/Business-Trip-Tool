@@ -35,7 +35,7 @@ struct Town_Frequency
 const string TRIP_INFO = "trip_data.txt";
 
 const string NO_FILE_ACCESS = "Файл пуст или недоступен для чтения. Выберите дальнейшее действие:\n1.Вписать данные.\n2.Выйти из программы\n";
-//--------------------ВВОД-ДАННЫХ-------------------------------------------------------------------------------
+//--------------------DATA INPUT MESSAGES-------------------------------------------------------------------------------
 const string ENTER_SURNAME="Введите фамилию работника:\n";
 const string ENTER_NAME="Введите имя работника:\n";
 const string ENTER_PATRONYMIC="Введите отчество работника(если у работника нет отчества, введите \"No\")\n";
@@ -47,7 +47,7 @@ const string ENTER_MONEY="Введите количество (только число) выделенной суммы в р
 const string ENTER_CURRENCY = "Введите валюту (в формате USD,EUR,RUB,BYN и т.д.):\n";
 //--------------------------------------------------------------------------------------------------------------
 const string WANT_STOP = "Желаете остановиться?\n 1.Да\n 2.Нет\n";
-//------------------------МЕНЮ------------------------------------------------------------------------------------------------------------------------------------
+//------------------------MENU------------------------------------------------------------------------------------------------------------------------------------
 const string ACCOUNT_MENU_ROLE_0 = " 1.Изменить свой логин и пароль\n 0.Выйти в главное меню\n";
 const string TRIP_MENU_ROLE_0 = " 1.Просмотреть все командировочные данные\n 2.Определить общие выплаты командировочных за месяц Х (вводится с клавиатуры)\n\
  3.Вывести список наиболее часто посещаемых городов с месяца X по месяц Y (значения X и Y вводятся с клавиатуры)\n 4.Найти данные\n 5.Отсортировать данные\n\
@@ -87,7 +87,7 @@ const string SB_MONEY="сумме командировочных расходов в день\n";
 
 const string WRONG_MONTH = "Название месяца введено неверно, попробуйте ещё раз:\n";
 
-//-----ЧИСЛОВЫЕ-КОНСТАНТЫ-------
+//-----NUMERIC CONSTANTS-------
 const int F_I_O_LINE_LIMIT = 22;
 const int YEAR_LINE_LIMIT = 11;
 const int MONTH_LINE_LIMIT = 13;
@@ -97,7 +97,7 @@ const int TOWN_LINE_LIMIT = 21;
 const int CURRENCY_LIMIT = 3;
 const int FREQUENCY_LINE_LIMIT = 20;
 
-bool canUserContinue(Account& guest);
+bool canUserContinue(Account& guest, bool exit_token);
 
 void checkPatronymic(Trip_Man& temp);
 
@@ -105,7 +105,7 @@ void enterEmployees(vector <Trip_Man>& emp);
 void enter1Employee(Trip_Man& temp);
 
 void processTripFile(vector <Trip_Man>& emp,bool is_file_open, bool& exit_token);
-void readTripFile(vector <Trip_Man> emp, bool& is_file_open);
+void readTripFile(vector <Trip_Man>& emp, bool& is_file_open);
 int countStructuresInTripFile(bool& is_file_open);
 void writeTripFile(vector<Trip_Man> emp);
 void writeEndTripFile(Trip_Man new_emp);

@@ -3,6 +3,7 @@
 using namespace std;
 #include <string>
 #include <iostream>
+#include <Windows.h>
 
 const string YOU_SURE = "Вы уверены?\n 1.Да\n 2. Нет\n";
 const string ERROR_INPUT = "Неверный ввод. Введите значение, соответствующее запрошенному\n\
