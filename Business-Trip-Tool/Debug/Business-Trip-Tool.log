@@ -1,4 +1,9 @@
-﻿  Common_Tools.cpp
-E:\Business-Trip-Tool\Business-Trip-Tool\Common_Tools.cpp(17,21): warning C4018: >: несоответствие типов со знаком и без знака
-E:\Business-Trip-Tool\Business-Trip-Tool\Common_Tools.cpp(137,29): warning C4018: <=: несоответствие типов со знаком и без знака
+﻿  Accounts.cpp
+E:\Business-Trip-Tool\Business-Trip-Tool\Accounts.cpp(159,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+  Common_Tools.cpp
+E:\Business-Trip-Tool\Business-Trip-Tool\Common_Tools.cpp(19,21): warning C4018: >: несоответствие типов со знаком и без знака
+E:\Business-Trip-Tool\Business-Trip-Tool\Common_Tools.cpp(141,29): warning C4018: <=: несоответствие типов со знаком и без знака
+  Options.cpp
+  main.cpp
+  Создание кода...
   Business-Trip-Tool.vcxproj -> E:\Business-Trip-Tool\Business-Trip-Tool\Debug\Business-Trip-Tool.exe

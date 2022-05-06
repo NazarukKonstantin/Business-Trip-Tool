@@ -1,9 +1,7 @@
 #include "Accounts.h"
 #include <windows.h>
 #include "Options.h"
-
 using namespace std;
-
 int main()
 {
 	SetConsoleCP(1251);
@@ -19,7 +17,7 @@ int main()
 	{
 		vector <Trip_Man> emp;
 		bool is_file_open = true;
-		processTripFile(emp, is_file_open, exit_token);
+		processTripFile(acc,guest,emp, is_file_open, exit_token);
 		if (!exit_token)
 		{
 			do

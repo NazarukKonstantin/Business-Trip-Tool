@@ -40,11 +40,12 @@ const string EXISTING_LOGIN_ERROR = "Такой логин уже существует. Пожалуйста, вве
 const string WEAK_PASSWORD = "Ваш пароль слишком слаб, безопасный пароль должен содержать от 8 до 16 символов,\n\
 включая как минимум одну строчную и заглавную букву, одну цифру и один символ типа @ # $ % * и т.п.\n";
 const string TOO_HARD_TO_REMEMBER = "Ваш пароль содержит слишком много символов.\n";
-const string PASSWORD_CONFIRMATION = "Вы подтверждаете пароль ?\n\
-(В дальнейшем можно изменить пароль в соответствующем пункте меню)\n 1.Да\n 2.Нет\n";
+const string PASSWORD_CONFIRMATION_P1 = "Вы подтверждаете пароль";
+const string PASSWORD_CONFIRMATION_P2 = "?\n(В дальнейшем можно изменить пароль в соответствующем пункте меню)\n 1.Да\n 2.Нет\n";
 const string HIDE_OR_SHOW_PASSWORD = "Показывать пароль?\n 1.Да\n 2.Нет\n";
 
-const string WRONG_ENTER = "Неверный логин или пароль. Попробуйте ещё раз.\n";
+const string WRONG_ENTER = "Неверный логин или пароль\n";
+const string TRY_AGAIN_M = "Попробуйте ещё раз\n";
 
 const string TABLE_ACCOUNTS_HEADER = "|-------|ЛОГИН|-------|-------|РОЛЬ|-------|-------|ДОСТУП|-------|\n";
 const string ROLE = "Установите роль этого аккаунта:\n 1.Администратор\n 2.Пользователь\n";

@@ -10,12 +10,16 @@ bool canUserContinue(Account& guest, bool exit_token)
 	{
 		if (!doesAccountHaveAccess(guest) && !areYouNew(guest))
 		{
+			clearScreen();
 			cout << BAN_CONDITION;
 		}
 		else if (!doesAccountHaveAccess(guest) && areYouNew(guest))
 		{
-			if(!exit_token)
-			cout << WAIT_4_CONFIRMATION;
+			clearScreen();
+			if (!exit_token)
+			{
+				cout << WAIT_4_CONFIRMATION;
+			}
 		}
 	}
 	return false;
@@ -41,6 +45,7 @@ void enterEmployees(vector <Trip_Man>& emp)
 }
 void enter1Employee(Trip_Man& temp)
 {
+	clearScreen();
 	cout << ENTER_SURNAME;
 	inputSurname(temp);
 	cout << ENTER_NAME;
@@ -61,19 +66,20 @@ void enter1Employee(Trip_Man& temp)
 	inputTown(temp);
 }
 
-void processTripFile(vector <Trip_Man>& emp,bool is_file_open,bool& exit_token)
+void processTripFile(vector<Account>& acc, Account& guest,vector <Trip_Man>& emp,bool is_file_open,bool& exit_token)
 {
 	readTripFile(emp, is_file_open);
 	if (!is_file_open)
 	{
+		clearScreen();
 		cout << NO_FILE_ACCESS;
-		int choice = inputIntNumbers(1, 2);
-		if (choice == 2)
+		int choice = inputIntNumbers(0,2);
+		switch (choice)
 		{
-			exit_token = true;
-			return;
+		case 0: exit_token = true; break;
+		case 1: enterEmployees(emp); break;
+		case 2: processAccountMenu(acc,guest); break;
 		}
-		enterEmployees(emp);
 	}
 }
 void checkPatronymic(Trip_Man& temp)
@@ -96,7 +102,7 @@ void checkPatronymic(Trip_Man& temp)
 		{
 			cout << YOU_SURE;
 			int sure = inputIntNumbers(1, 2);
-			if (sure == 1)
+			if (sure == 2)
 			{
 				temp.patronymic = check4TooBigString(F_I_O_LINE_LIMIT, TOO_BIG_STRING, onlyLettersInput);
 				break;
@@ -186,6 +192,7 @@ void writeTripFile(vector<Trip_Man> emp)
 
 void processMainMenu(vector <Trip_Man>& emp, vector<Account>& acc, Account& guest)
 {
+	clearScreen();
 	cout << MAIN_MENU;
 	int main_menu_choice = inputIntNumbers(0, 2);
 	switch (main_menu_choice)
@@ -197,6 +204,7 @@ void processMainMenu(vector <Trip_Man>& emp, vector<Account>& acc, Account& gues
 }
 void processAccountMenu(vector<Account>& acc, Account& guest)
 {
+	clearScreen();
 	do
 	{
 		guest.role == 1 ? cout << ACCOUNT_MENU_ROLE_1 : cout << ACCOUNT_MENU_ROLE_0;
@@ -206,20 +214,21 @@ void processAccountMenu(vector<Account>& acc, Account& guest)
 			switch (choice)
 			{
 			case 2: showAccountArray(acc); break;
-			case 3: addAccountInArray(acc, guest); break;
-			case 4: pickAccountInArray(TO_EDIT,CHOOSE_TO_EDIT,acc, editAccountMenu); break;
-			case 5: pickAccountInArray(TO_DELETE,CHOOSE_TO_DELETE,acc, deleteAccountInArray); break;
+			case 3: addAccountInArray(acc, guest); clearScreen(); break;
+			case 4: pickAccountInArray(TO_EDIT,CHOOSE_TO_EDIT,acc, editAccountMenu); clearScreen(); break;
+			case 5: pickAccountInArray(TO_DELETE,CHOOSE_TO_DELETE,acc, deleteAccountInArray); clearScreen(); break;
 			}
 		}
 		switch (choice)
 		{
-		case 1: changeLogin(acc, guest); break;
+		case 1: changeLogin(acc, guest); clearScreen(); break;
 		case 0: return;
 		}
 	} while (!wantToGoBack());
 }
 void processTripMenu(vector<Trip_Man> emp, Account guest)
 {
+	clearScreen();
 	do
 	{
 		int useless_counter = 0;
@@ -232,10 +241,10 @@ void processTripMenu(vector<Trip_Man> emp, Account guest)
 		switch (choice)
 		{
 		case 1: showTripArray(emp); break;
-		case 2: countMoney4MonthX(emp); break;
-		case 3: sortTowns(emp); break;
-		case 4: searchMenu(emp,useless_counter); break;
-		case 5: sortMenu(emp); break;
+		case 2: countMoney4MonthX(emp); clearScreen(); break;
+		case 3: sortTowns(emp); clearScreen(); break;
+		case 4: searchMenu(emp, useless_counter); clearScreen(); break;
+		case 5: sortMenu(emp); clearScreen(); break;
 		case 0: return;
 		}
 	} while (!wantToGoBack());
@@ -244,6 +253,8 @@ void processDataChangeMenu(vector<Trip_Man>& emp)
 {
 	do
 	{
+		clearScreen();
+		showTripArray(emp);
 		cout << DATA_CHANGE_MENU_ROLE_1;
 		int choice = inputIntNumbers(0,3);
 		switch (choice)
@@ -258,6 +269,7 @@ void processDataChangeMenu(vector<Trip_Man>& emp)
 
 void showTripArray(vector<Trip_Man>emp)
 {
+	clearScreen();
 	int vec_size = emp.size();
 	cout << TABLE_TRIP_HEADER;
 	for (int curr_emp = 0; curr_emp < vec_size; curr_emp++)
@@ -296,6 +308,8 @@ void showOneEmployee(vector<Trip_Man>emp, int curr_emp)
 }
 void countMoney4MonthX(vector<Trip_Man> emp)
 {
+	clearScreen();
+	showTripArray(emp);
 	cout << ENTER_MONTH;
 	string input_month=check4TooBigString(MONTH_LINE_LIMIT,TOO_BIG_STRING,onlyLettersInput);
 	vector<Month_Money> value;
@@ -343,10 +357,11 @@ string countMoney(vector<Month_Money> value)
 
 void sortTowns(vector<Trip_Man> emp)
 {
+	clearScreen();
+	showTripArray(emp);
 	string month_x, month_y;
 	int year_x=0, year_y=0;
 	int X = 0, Y = 0;
-	cout << ENTER_MONTH_X;
 	X = enterMonth(ENTER_MONTH_X, month_x);
 	cout << ENTER_YEAR;
 	year_x = inputIntNumbers(YEAR_LINE_LIMIT);
@@ -357,14 +372,16 @@ void sortTowns(vector<Trip_Man> emp)
 	vector<Town_Frequency> town_set, picked_towns;
 	fillTowns2SortArray(town_set, emp, year_x, year_y, X, Y);
 	writeTownsInSortArray(town_set, picked_towns);
-	sort(picked_towns.begin(), picked_towns.end(), sortByFrequency);
+	mySort(picked_towns,sortByFrequency);
 	showSortedTowns(picked_towns, X, Y,year_x,year_y,emp);
 }
 
-int enterMonth(string message, string& month)
+int enterMonth(vector<Trip_Man> emp,string message, string& month)
 {
 	while (true)
 	{
+		clearScreen();
+		showTripArray(emp);
 		cout << message;
 		(cin >> month).get();
 		int str_size = month.size();
@@ -477,9 +494,9 @@ void writeTownsInSortArray(vector<Town_Frequency> town_set, vector<Town_Frequenc
 		}
 	}
 }
-bool sortByFrequency(Town_Frequency first, Town_Frequency second)
+bool sortByFrequency(Town_Frequency first, Town_Frequency second, int choice)
 {
-	return first.frequency < second.frequency;
+	return (choice==1)?first.frequency < second.frequency: first.frequency > second.frequency;
 }
 void showSortedTowns(vector<Town_Frequency> picked_towns, int X, int Y, int year_x, int year_y, vector<Trip_Man>emp)
 {
@@ -502,6 +519,7 @@ void showSortedTowns(vector<Town_Frequency> picked_towns, int X, int Y, int year
 		}
 		if (!flag_x && !flag_y) break;
 	}
+	clearScreen();
 	cout << SORTED_TOWNS_P1 << month_x << SORTED_TOWNS_P2 << year_x << SORTED_TOWNS_P3 << month_y << SORTED_TOWNS_P2 << year_y << SORTED_TOWNS_P4;
 	cout << TOWN_TABLE_HEADER;	
 	for (int curr_town = 0; curr_town < temp_size; curr_town++)
@@ -516,6 +534,8 @@ void searchMenu(vector<Trip_Man> emp, int& counter)
 {
 	do
 	{
+		clearScreen();
+		showTripArray(emp);
 		cout << SEARCH_MENU;
 		int choice = inputIntNumbers(0,5);
 		switch (choice)
@@ -531,10 +551,13 @@ void searchMenu(vector<Trip_Man> emp, int& counter)
 }
 void searchData(string message, vector<Trip_Man>& emp, int& counter, bool(*searchCondition)(string search_input, int current_letter, vector<Trip_Man> emp, int curr_emp))
 {
+	clearScreen();
+	showTripArray(emp);
 	cout << message;
 	string search_input = onlyLettersInput();
 	int emp_size = emp.size();
 	int search_size = search_input.size();
+	clearScreen();
 	cout << "--¹--|"<<TABLE_TRIP_HEADER;
 	for (int curr_emp = 0; curr_emp < emp_size; curr_emp++)
 	{
@@ -575,8 +598,10 @@ void sortMenu(vector<Trip_Man> emp)
 {
 	do
 	{
+		clearScreen();
+		showTripArray(emp);
 		cout << SORT_MENU;
-		int choice = inputIntNumbers(0, 5);
+		int choice = inputIntNumbers(0, 8);
 		switch (choice)
 		{
 		case 1: sortData(SB_SURNAME, emp, sortBySurname); break;
@@ -584,68 +609,81 @@ void sortMenu(vector<Trip_Man> emp)
 		case 3: sortData(SB_PATRONYMIC, emp, sortByPatronymic); break;
 		case 4: sortData(SB_DAYS, emp, sortByDays); break;
 		case 5: sortData(SB_MONEY, emp, sortByMoney); break;
+		case 6: sortData(SB_CURRENCY, emp, sortByMoney); break;
+		case 7: sortData(SB_MONTH, emp, sortByMonth); break;
+		case 8: sortData(SB_TOWN, emp, sortByMoney); break;
 		case 0: return;
 		}
 	} while (!wantToGoBack());
 }
-void sortData(string message, vector<Trip_Man>emp, bool(*sortCondition)(Trip_Man first, Trip_Man second))
+void sortData(string message, vector<Trip_Man>emp, bool(*sortCondition)(Trip_Man first, Trip_Man second, int choice))
 {
 	cout << SORT_DIRECTION;
 	int choice = inputIntNumbers(1, 2);
 	cout << SORTED_BY << message;
-	switch (choice)
+	mySort(emp,sortCondition);
+	/*switch (choice)
 	{
 	case 1: sort(emp.begin(), emp.end(), sortCondition); break;
 	case 2: mySort4Decending(emp, sortCondition); break;
-	}
+	}*/
 	showTripArray(emp);
 }
-void mySort4Decending(vector<Trip_Man> emp, bool (*sortCondition)(Trip_Man first, Trip_Man second))
+template <class T>
+void mySort(vector<T> vec, bool (*sortCondition)(T first, T second,int choice))
 {
-	int emp_size = emp.size();
-	for (int curr_emp = 0; curr_emp < emp_size - 1; curr_emp++)
+	int vec_size = vec.size();
+	for (int curr_elem = 0; curr_elem < vec_size - 1; curr_elem++)
 	{
-		for (int next_emp = curr_emp + 1; next_emp < emp_size; next_emp++)
+		for (int next_elem = curr_elem + 1; next_elem < vec_size; next_elem++)
 		{
-			if (sortCondition(emp[curr_emp], emp[next_emp]))
-				swap(emp[curr_emp], emp[next_emp]);
+			if (!sortCondition) //if doesn't fit the order (ascending ¹1<¹2, descending ¹1>¹2)
+				swap(vec[curr_elem], vec[next_elem]);
 		}
 	}
 }
-bool sortBySurname(Trip_Man first, Trip_Man second)
+bool sortBySurname(Trip_Man first, Trip_Man second, int choice)
 {
-	return first.surname < second.surname;
+	return (choice == 1) ? first.surname < second.surname : first.surname > second.surname;
 }
-bool sortByName(Trip_Man first, Trip_Man second)
+bool sortByName(Trip_Man first, Trip_Man second, int choice)
 {
-	return first.name < second.name;
+	return (choice==1) ? first.name < second.name: first.name > second.name;
 }
-bool sortByPatronymic(Trip_Man first, Trip_Man second)
+bool sortByPatronymic(Trip_Man first, Trip_Man second, int choice)
 {
-	return first.patronymic < second.patronymic;
+	return (choice == 1) ? first.patronymic < second.patronymic : first.patronymic > second.patronymic;
 }
-bool sortByDays(Trip_Man first, Trip_Man second)
+bool sortByDays(Trip_Man first, Trip_Man second, int choice)
 {
-	return first.trip_length < second.trip_length;
+	return (choice == 1) ? first.trip_length < second.trip_length : first.trip_length > second.trip_length;
 }
-bool sortByMoney(Trip_Man first, Trip_Man second)
+bool sortByMoney(Trip_Man first, Trip_Man second, int choice)
 {
-	return first.money_per_day < second.money_per_day;
+	return (choice == 1) ? first.money_per_day < second.money_per_day : first.money_per_day > second.money_per_day;
+}
+bool sortByMonth(Trip_Man first, Trip_Man second, int choice)
+{
+	return (choice == 1) ? first.month_num < second.month_num : first.month_num > second.month_num;
+}
+bool sortByCurrency(Trip_Man first, Trip_Man second, int choice)
+{
+	return (choice == 1) ? first.currency < second.currency : first.currency > second.currency;
+}
+bool sortByTown(Trip_Man first, Trip_Man second, int choice)
+{
+	return (choice == 1) ? first.town < second.town : first.town > second.town;
 }
 
 void addData(vector<Trip_Man>&emp)
 {
-	cout << YOU_SURE;
-	int sure = inputIntNumbers(1, 2);
-	if (sure==1)
-	{
-		enterEmployees(emp);
-		writeTripFile(emp);
-	}
+	enterEmployees(emp);
+	writeTripFile(emp);
 }
 
 void pickDataInArray(string message, vector<Trip_Man>& emp, void (*changeData)(vector<Trip_Man>& emp, int curr_emp))
 {
+	clearScreen();
 	showTripArray(emp);
 	int counter = 0;
 	searchMenu(emp,counter);
@@ -668,6 +706,8 @@ void editDataMenu(vector<Trip_Man>& emp, int curr_emp)
 	int sure = inputIntNumbers(1, 2);
 	if (sure == 1)
 	{
+		clearScreen();
+		showTripArray(emp);
 		cout << EDIT_DATA_MENU;
 		int choice = inputIntNumbers(0, 10);
 		switch (choice)
@@ -688,6 +728,8 @@ void editDataMenu(vector<Trip_Man>& emp, int curr_emp)
 }
 void editData(string message,vector<Trip_Man>& emp, int curr_emp,void(*inputNewData)(Trip_Man& temp))
 {
+	clearScreen();
+	showTripArray(emp);
 	cout << message;
 	inputNewData(emp[curr_emp]);
 }
@@ -743,6 +785,8 @@ void inputTown(Trip_Man& temp)
 
 void deleteData(vector<Trip_Man>& emp, int curr_emp)
 {
+	clearScreen();
+	showTripArray(emp);
 	cout << YOU_SURE;
 	int sure = inputIntNumbers(1,2);
 	if (sure == 1)

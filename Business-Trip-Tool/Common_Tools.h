@@ -15,9 +15,10 @@ const string CHOOSE_TO_EDIT = "¬ведите номер строки, которую хотите отредактиров
 const string CHOOSE_TO_DELETE = "¬ведите номер строки, которую хотите удалить: ";
 
 
-bool wantToGoBack();
+bool wantToGoBack(string message=GO_BACK_QUESTION);
 string check4TooBigString(int limit, string message,string(*inputCondition)());
 void clearStream();
+void clearScreen();
 string justEnterString();
 string onlyLettersInput();
 

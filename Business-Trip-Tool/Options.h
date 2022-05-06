@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Accounts.h"
-#include <algorithm>
 
 struct Trip_Man
 {
@@ -34,7 +33,7 @@ struct Town_Frequency
 
 const string TRIP_INFO = "trip_data.txt";
 
-const string NO_FILE_ACCESS = "Файл пуст или недоступен для чтения. Выберите дальнейшее действие:\n1.Вписать данные.\n2.Выйти из программы\n";
+const string NO_FILE_ACCESS = "Файл пуст или недоступен для чтения. Выберите дальнейшее действие:\n1.Вписать данные\n2.Работа с аккаунтами\n0.Выйти из программы\n";
 //--------------------DATA INPUT MESSAGES-------------------------------------------------------------------------------
 const string ENTER_SURNAME="Введите фамилию работника:\n";
 const string ENTER_NAME="Введите имя работника:\n";
@@ -63,7 +62,7 @@ const string EDIT_DATA_MENU = "Изменить:\n 1.Фамилию\n 2.Имя\n 3.Отчество\n 4.Го
  8.Валюту\n 9.Город назначения\n 10.Все данные о сотруднике\n 0.Вернуться в меню изменения данных\n";
 const string SEARCH_MENU="Искать данные по:\n 1.Фамилии\n 2.Имени \n3.Отчеству\n 4.Городу назначения\n 5.Месяцу поездки\n 0.Выход в меню работы с командировочными данными\n";
 const string SORT_MENU="Сортировать данные по:\n 1.Фамилии\n 2.Имени\n 3.Отчеству\n 4.Длительности командировки(в днях)\n\
- 5.Сумме командировочных расходов в день\n 0.Выйти в меню работы с командировочными данными\n";
+ 5.Сумме командировочных расходов в день\n 6.Валюте\n 7.Месяцам\n 8.Городам\n 0.Выйти в меню работы с командировочными данными\n";
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 const string TABLE_TRIP_HEADER = "|-------|Ф.И.О.|-------|---|ГОД|---|---|МЕСЯЦ|---|-|КОЛ-ВО ДНЕЙ ПОЕЗДКИ|-|-|СУММА НА ДЕНЬ|-|-------|ГОРОД|-------|\n";
 
@@ -84,6 +83,10 @@ const string SB_NAME="имени:\n";
 const string SB_PATRONYMIC="отчеству:\n";
 const string SB_DAYS="длительности командировки (в днях):\n";
 const string SB_MONEY="сумме командировочных расходов в день\n";
+const string SB_CURRENCY = "валюте\n";
+const string SB_MONTH="месяцам\n";
+const string SB_TOWN="городам\n";
+
 
 const string WRONG_MONTH = "Название месяца введено неверно, попробуйте ещё раз:\n";
 
@@ -104,7 +107,7 @@ void checkPatronymic(Trip_Man& temp);
 void enterEmployees(vector <Trip_Man>& emp);
 void enter1Employee(Trip_Man& temp);
 
-void processTripFile(vector <Trip_Man>& emp,bool is_file_open, bool& exit_token);
+void processTripFile(vector<Account>& acc, Account& guest,vector <Trip_Man>& emp,bool is_file_open, bool& exit_token);
 void readTripFile(vector <Trip_Man>& emp, bool& is_file_open);
 int countStructuresInTripFile(bool& is_file_open);
 void writeTripFile(vector<Trip_Man> emp);
@@ -122,12 +125,12 @@ string countMoney(vector<Month_Money> value);
 
 void sortTowns(vector<Trip_Man> emp);
 
-int enterMonth(string message, string& month);
+int enterMonth(vector<Trip_Man> emp,string message, string& month);
 int convertMonthName2Number(string month, int str_size);
 void fillTowns2SortArray(vector<Town_Frequency>& town_set,vector<Trip_Man> emp, int year_x, int year_y, int X, int Y);
 void write1TownInTownSet(vector<Trip_Man> emp, vector<Town_Frequency>& town_set, Town_Frequency temp, int emp_size, int X, int year_x);
 void writeTownsInSortArray(vector<Town_Frequency> town_set, vector<Town_Frequency>& picked_towns);
-bool sortByFrequency(Town_Frequency first, Town_Frequency second);
+bool sortByFrequency(Town_Frequency first, Town_Frequency second, int choice=1);
 void showSortedTowns(vector<Town_Frequency> picked_towns, int X, int Y, int year_x, int year_y, vector<Trip_Man>emp);
 
 void searchMenu(vector<Trip_Man> emp,int& counter);
@@ -139,13 +142,18 @@ bool searchByTown(string search_input, int current_letter, vector<Trip_Man> emp,
 bool searchByMonth(string search_input, int current_letter, vector<Trip_Man> emp, int curr_emp);
 
 void sortMenu(vector<Trip_Man> emp);
-void sortData(string message, vector<Trip_Man>emp, bool(*sortCondition)(Trip_Man first, Trip_Man second));
-bool sortBySurname(Trip_Man first, Trip_Man second);
-bool sortByName(Trip_Man first, Trip_Man second);
-bool sortByPatronymic(Trip_Man first, Trip_Man second);
-bool sortByDays(Trip_Man first, Trip_Man second);
-bool sortByMoney(Trip_Man first, Trip_Man second);
-void mySort4Decending(vector<Trip_Man> emp, bool (*sortCondition)(Trip_Man first, Trip_Man second));
+void sortData(string message, vector<Trip_Man>emp, bool(*sortCondition)(Trip_Man first, Trip_Man second, int choice));
+bool sortBySurname(Trip_Man first, Trip_Man second, int choice);
+bool sortByName(Trip_Man first, Trip_Man second, int choice);
+bool sortByPatronymic(Trip_Man first, Trip_Man second, int choice);
+bool sortByDays(Trip_Man first, Trip_Man second, int choice);
+bool sortByMoney(Trip_Man first, Trip_Man second, int choice);
+bool sortByMonth(Trip_Man first, Trip_Man second, int choice);
+bool sortByCurrency(Trip_Man first, Trip_Man second, int choice);
+bool sortByTown(Trip_Man first, Trip_Man second, int choice);
+
+template <class T>
+void mySort(vector<T> vec, bool (*sortCondition)(T first, T second, int choice));
 
 void addData(vector<Trip_Man>& emp);
 

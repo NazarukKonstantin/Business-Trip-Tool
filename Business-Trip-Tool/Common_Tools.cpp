@@ -1,13 +1,15 @@
 #include "Common_Tools.h"
 
-bool wantToGoBack()
+bool wantToGoBack(string message)
 {
-	cout << GO_BACK_QUESTION;
+	cout << message;
 	int choice = inputIntNumbers(1, 2);
 	if (choice == 1)
 	{
+		clearScreen();
 		return true;
 	}
+	clearScreen();
 	return false;
 }
 
@@ -99,7 +101,6 @@ int inputIntNumbers(int l_border, int r_border)
 		}
 		else
 		{
-			clearStream();
 			cout << ERROR_INPUT;
 		}
 	}
@@ -127,7 +128,6 @@ int inputIntNumbers(int limit)
 		}
 		else
 		{
-			clearStream();
 			cout << ERROR_INPUT;
 		}
 	}

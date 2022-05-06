@@ -2,6 +2,7 @@
 
 void showOptionsOnEnter(vector<Account>acc, Account& guest)
 {
+	clearScreen();
 	cout << SIGN_UP_OR_LOG_IN;
 	proceedPickedOption(acc, guest);
 }
@@ -17,6 +18,7 @@ void proceedPickedOption(vector<Account>acc, Account& guest)
 }
 void showOptionsOnEnter(vector<Account>acc, Account& guest, bool& exit_token)
 {
+	clearScreen();
 	cout << SIGN_UP_OR_LOG_IN;
 	proceedPickedOption(acc,guest,exit_token);
 }
@@ -43,6 +45,7 @@ void setDefaultAccount()
 
 void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& guest)
 {
+	clearScreen();
 	cout << LOGIN_REQUEST;
 	Account new_acc;
 	new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterString);
@@ -61,6 +64,7 @@ void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& gues
 			return;
 		}
 	}
+	clearScreen();
 	cout << PASSWORD_REQUEST;
 	string input_password = showOrHidePassword();
 	int password_length = input_password.length();															// считает длину строки
@@ -84,12 +88,12 @@ void request4confirmation(string& input_password, bool& flag, int password_lengt
 	{
 		cout << WEAK_PASSWORD;						// если пароль небезопасный, выводит предупреждение
 	}
-	cout << PASSWORD_CONFIRMATION;				// запрос на подтверждение пароля пользователем
+	cout << PASSWORD_CONFIRMATION_P1<<" ("<<input_password<<")"<<PASSWORD_CONFIRMATION_P2;// запрос на подтверждение пароля пользователем
 	int choice = inputIntNumbers(1, 2);							// выбор пользователя
 	switch (choice)
 	{
 	case 1: flag = false; break;
-	case 2: cout << PASSWORD_REQUEST; input_password = showOrHidePassword(); break;
+	case 2: clearScreen(); cout << PASSWORD_REQUEST; input_password = showOrHidePassword(); break;
 	}
 }
 bool isLoginUnique(vector<Account>acc, string input_login)
@@ -187,6 +191,7 @@ string makePasswordHashedAndSalty(string input_password, string salt)
 string showOrHidePassword()
 {
 	string input_password;
+	clearScreen();
 	cout << HIDE_OR_SHOW_PASSWORD;
 	int choice = inputIntNumbers(1, 2);
 	switch (choice)
@@ -194,7 +199,6 @@ string showOrHidePassword()
 	case 1: input_password=justEnterString(); break;
 	case 2: 
 		char temp;
-		getchar();
 		do
 		{
 			temp = _getch();
@@ -203,7 +207,7 @@ string showOrHidePassword()
 				input_password.erase(input_password.end() - 1);
 				cout << temp << " " << temp;
 			}
-			else
+			else if (temp!='\r')
 			{
 				input_password.push_back(temp);
 				cout << "*";
@@ -228,31 +232,36 @@ bool areYouNew(Account temp)
 void logIn(vector<Account>acc, Account& guest)
 {
 	bool flag = true;
+	clearScreen();
 	do
 	{
 		cout << LOGIN_REQUEST;
 		guest.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterString);
+		clearScreen();
 		cout << PASSWORD_REQUEST;
 		string input_password = justEnterString();
 		if (isLoginUnique(acc, guest.login)||!isPasswordCorrect(acc, guest, input_password))
 		{
-			cout << WRONG_ENTER;
-			if (wantToGoBack())
+			if (wantToGoBack(WRONG_ENTER+GO_BACK_QUESTION))
 			{
 				if (!guest.access)
 				{
 					showOptionsOnEnter(acc, guest);
+					break;
 				}
 				else
 				{
 					guest.active = false;
+					break;
 				}
-				break;
 			}
+			clearScreen();
+			cout << TRY_AGAIN_M;
 			continue;
 		}
 		guest.active = true;
-	} while (!flag);
+		flag = false;
+	} while (flag);
 }
 bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password)
 {
@@ -275,6 +284,7 @@ void showAccountArray(vector<Account>acc)
 {
 	int vec_size = acc.size();
 	string temp_role, temp_access;
+	clearScreen();
 	cout << TABLE_ACCOUNTS_HEADER;
 	for (int curr_acc = 0; curr_acc < vec_size; curr_acc++)
 	{
@@ -284,6 +294,7 @@ void showAccountArray(vector<Account>acc)
 		string access_length(ACCESS_LENGTH_LIMIT - temp_access.size(), ' ');
 		cout << "|" << acc[curr_acc].login << temp_4_login << "|" << temp_role << role_length << "|" << temp_access << access_length << "|\n";
 	}
+	cout << endl;
 }
 void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, string& temp_access)
 {
@@ -336,7 +347,8 @@ void pickAccountInArray(string message4search,string message, vector<Account>&ac
 	int counter = 0;
 	string search_to_edit;
 	searchAccount(search_to_edit,message4search,acc,counter);
-	if (search_to_edit == "0") return;
+	if (search_to_edit == "0") return; 
+	clearScreen();
 	cout << message;
 	int choice = inputIntNumbers(1, counter);
 	int vec_size = acc.size();
@@ -351,6 +363,8 @@ void pickAccountInArray(string message4search,string message, vector<Account>&ac
 }
 void editAccountMenu(vector<Account>& acc, int acc_num)
 {
+	clearScreen();
+	showAccountArray(acc);
 	cout << EDIT_ACCOUNT_MENU;
 	int choice = inputIntNumbers(0,3);
 	cout << YOU_SURE;
@@ -373,27 +387,28 @@ void editAccountMenu(vector<Account>& acc, int acc_num)
 
 void editLogin(string login_savespot, vector<Account>&acc, int acc_num)
 {
-	cout << LOGIN_REQUEST;
-	acc[acc_num].login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED, justEnterString);
-	if (acc[acc_num].login == "0")
+	while (true)
 	{
-		acc[acc_num].login = login_savespot;
-		return;
-	}
-	while (!isLoginUnique(acc, acc[acc_num].login))
-	{
-		cout << EXISTING_LOGIN_ERROR;
+		clearScreen();
+		showAccountArray(acc);
+		cout << LOGIN_REQUEST;
 		acc[acc_num].login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED, justEnterString);
 		if (acc[acc_num].login == "0")
 		{
 			acc[acc_num].login = login_savespot;
-			break;
+			return;
+		}
+		while (!isLoginUnique(acc, acc[acc_num].login))
+		{
+			cout << EXISTING_LOGIN_ERROR;
 		}
 	}
 }
 void editRole(vector<Account>& acc, int acc_num)
 {
 	int role_choice = 0;
+	clearScreen();
+	showAccountArray(acc);
 	if (acc[acc_num].active)
 	{
 		cout << DONT_CHANGE_YOUR_ROLE;
@@ -413,6 +428,8 @@ void editRole(vector<Account>& acc, int acc_num)
 void editAccess(vector<Account>& acc, int acc_num)
 {
 	int access_choice = 0;
+	clearScreen();
+	showAccountArray(acc);
 	if (acc[acc_num].active)
 	{
 		cout << DONT_CHANGE_YOUR_ACCESS;
@@ -432,12 +449,15 @@ void editAccess(vector<Account>& acc, int acc_num)
 
 void searchAccount(string& search_to_edit,string message,vector<Account>& acc, int&counter)
 {
+	clearScreen();
+	showAccountArray(acc);
 	cout << message;
 	string temp_role, temp_access;
 	search_to_edit= check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED, justEnterString);
 	if (search_to_edit == "0") return;
 	int amount_of_accounts = acc.size();
 	int search_size = search_to_edit.size();
+	clearScreen();
 	cout <<"--№--|"<< TABLE_ACCOUNTS_HEADER;
 	for (int current_account = 0; current_account < amount_of_accounts; current_account++)
 	{
@@ -460,6 +480,8 @@ void searchAccount(string& search_to_edit,string message,vector<Account>& acc, i
 }
 void deleteAccountInArray(vector<Account>& acc,int acc_num)
 {
+	clearScreen();
+	showAccountArray(acc);
 	cout << YOU_SURE;
 	char sure;
 	sure = _getch();
@@ -481,6 +503,7 @@ void changeLogin(vector<Account>& acc, Account& guest)
 		{
 			if (acc[curr_acc].active == 1)
 			{
+				clearScreen();
 				cout << YOU_SURE;
 				char sure= _getch();
 				cout << sure;
@@ -596,6 +619,7 @@ int countStructuresInAccountFile()
 	}
 	else
 	{
+		clearScreen();
 		cout << NO_ACCOUNTS_CASE;						// в случае невозможности считать файл в режиме чтения выводится сообщение
 		f_in.close();
 		setDefaultAccount();
