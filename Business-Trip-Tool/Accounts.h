@@ -98,8 +98,10 @@ void addAccountInArray(vector<Account>& acc, Account& guest);																			
 void pickAccountInArray(string message4search, string message, vector<Account>& acc, void (*changeAccount)(vector<Account>& acc, int acc_num));	// choose account to edit (4 Admin Only)
 void editAccountMenu(vector<Account>& acc, int acc_num);																						// edit account (4 Admin Only)
 void editLogin(string login_savespot, vector<Account>& acc, int acc_num);																		// change log-in (4 Admin Only)
-void editRole(vector<Account>& acc, int acc_num);																								// change role (4 Admin Only)
-void editAccess(vector<Account>& acc, int acc_num);																								// change access (4 Admin Only)
+template <typename T>
+void edit(vector<Account>& acc, int acc_num, T Account::* field, string dont_message, string input_message);									// change role or access (4 Admin Only)
+//void editRole(vector<Account>& acc, int acc_num);																								// change role (4 Admin Only)
+//void editAccess(vector<Account>& acc, int acc_num);																								// change access (4 Admin Only)
 void searchAccount(string& search_to_edit,string message, vector<Account>& acc, int& counter);													// searching and showing accounts similar 2 input
 void deleteAccountInArray(vector<Account>& acc, int acc_num);																					// delete account (4 Admin Only)
 void changeLogin(vector<Account>& acc, Account& guest);																							// change ones log-in and password

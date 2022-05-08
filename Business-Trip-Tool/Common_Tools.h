@@ -4,6 +4,7 @@ using namespace std;
 #include <string>
 #include <iostream>
 #include <Windows.h>
+#include <conio.h>
 
 const string YOU_SURE = "Вы уверены?\n 1.Да\n 2. Нет\n";
 const string ERROR_INPUT = "Неверный ввод. Введите значение, соответствующее запрошенному\n\
@@ -16,11 +17,14 @@ const string CHOOSE_TO_DELETE = "Введите номер строки, которую хотите удалить: "
 
 
 bool wantToGoBack(string message=GO_BACK_QUESTION);
-string check4TooBigString(int limit, string message,string(*inputCondition)());
+string check4TooBigString(int limit, string message, char(*inputCond)());
 void clearStream();
 void clearScreen();
-string justEnterString();
-string onlyLettersInput();
+//string justEnterString(char(*inputCondition)());
+//string onlyLettersInput(char(*inputCondition)());
+string oneWordInput(char(*inputCondition)());
+char justEnterChar();
+char onlyLetterInput();
 
 int inputIntNumbers(int l_border, int r_border);
 bool doesFitInRange(int temp, int l_border, int r_border);

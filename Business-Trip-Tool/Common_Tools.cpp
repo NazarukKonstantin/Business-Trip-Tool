@@ -13,15 +13,15 @@ bool wantToGoBack(string message)
 	return false;
 }
 
-string check4TooBigString(int limit,string message,string(*inputCondition)())
+string check4TooBigString(int limit,string message, char(*inputCond)())
 {
-	string temp = inputCondition();
+	string temp = oneWordInput(inputCond);
 	while (temp.size() > limit)
 	{
 		cout << message;
 		if(!wantToGoBack())
 		{ 
-			temp = inputCondition();
+			temp = oneWordInput(inputCond);
 		}
 		else
 		{
@@ -141,36 +141,71 @@ bool doesFitInRange(int temp, int limit)
 	return false;
 }
 
-string justEnterString()
+//string justEnterString(char(*inputCondition)())
+//{
+//	string temp;
+//	getline(cin, temp);
+//	return temp;
+//}
+//string onlyLettersInput(char(*inputCondition)())
+//{
+//	string temp;
+//	while (true)
+//	{
+//		getline(cin, temp);
+//		int str_size = temp.size();
+//		int amount_of_letters = 0;
+//		for (int curr_symbol = 0; curr_symbol < str_size; curr_symbol++)
+//		{
+//			char curr_symb = temp.at(curr_symbol);
+//			if ((curr_symb >= 'A' && curr_symb <= 'Z') || (curr_symb >= 'a' && curr_symb <= 'z') ||
+//				(curr_symb >= 'À' && curr_symb <= 'ß' || (curr_symb >= 'à' && curr_symb <= 'ÿ')))
+//			{
+//				amount_of_letters++;
+//			}
+//		}
+//		if (amount_of_letters == str_size)
+//		{
+//			return temp;
+//		}
+//		else
+//		{
+//			cout << ERROR_INPUT;
+//		}
+//	}
+//}
+
+char justEnterChar()
 {
-	string temp;
-	getline(cin, temp);
-	return temp;
+	return _getch();
 }
-string onlyLettersInput()
+char onlyLetterInput()
+{
+	while (true)
+	{
+		char temp = _getch();
+		if ((temp >= 'A' && temp <= 'Z') || (temp >= 'a' && temp <= 'z') ||
+			(temp >= 'À' && temp <= 'ß' || (temp >= 'à' && temp <= 'ÿ')))
+		{
+			return temp;
+		}
+	}
+}
+
+string oneWordInput(char(*inputCondition)())
 {
 	string temp;
 	while (true)
 	{
-		getline(cin, temp);
-		int str_size = temp.size();
-		int amount_of_letters = 0;
-		for (int curr_symbol = 0; curr_symbol < str_size; curr_symbol++)
-		{
-			char curr_symb = temp.at(curr_symbol);
-			if ((curr_symb >= 'A' && curr_symb <= 'Z') || (curr_symb >= 'a' && curr_symb <= 'z') ||
-				(curr_symb >= 'À' && curr_symb <= 'ß' || (curr_symb >= 'à' && curr_symb <= 'ÿ')))
-			{
-				amount_of_letters++;
-			}
-		}
-		if (amount_of_letters == str_size)
+		char symb = inputCondition();
+		if (symb == '\r')
 		{
 			return temp;
 		}
-		else
+		if (symb != ' ')
 		{
-			cout << ERROR_INPUT;
+			cout << symb;
+			temp.push_back(symb);
 		}
 	}
 }

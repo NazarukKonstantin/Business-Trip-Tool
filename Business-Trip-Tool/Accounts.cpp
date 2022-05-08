@@ -48,7 +48,7 @@ void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& gues
 	clearScreen();
 	cout << LOGIN_REQUEST;
 	Account new_acc;
-	new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterString);
+	new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterChar); //returns "0" if user wants to go back
 	if (new_acc.login=="0")
 	{
 		showOptionsOnEnter(acc, guest);
@@ -57,7 +57,7 @@ void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& gues
 	while (!isLoginUnique(acc,new_acc.login))
 	{
 		cout << EXISTING_LOGIN_ERROR;
-		new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED, justEnterString);
+		new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED,justEnterChar); //returns "0" if user wants to go back
 		if (new_acc.login == "0")
 		{
 			showOptionsOnEnter(acc, guest);
@@ -67,10 +67,10 @@ void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& gues
 	clearScreen();
 	cout << PASSWORD_REQUEST;
 	string input_password = showOrHidePassword();
-	int password_length = input_password.length();															// считает длину строки
+	int password_length = input_password.length();
 	bool flag = true;
-	while ((!isPasswordStrong(input_password,password_length)||password_length>SAFE_PASSWORD_LENGTH_RIGTH) && flag)	// условие захода в цикл: небезопасный пароль или пользователь его не подтвердил или пароль слишком длинный
-	{																												// запрос на подтверждение не происходит, если пароль безопасен
+	while ((!isPasswordStrong(input_password,password_length)||password_length>SAFE_PASSWORD_LENGTH_RIGTH) && flag)	// cicle entering conditions: unsafe password or user didn't confirm it(flag=true) or password's too long
+	{																												// confirmation request doesn't happen if the password is safe
 		request4confirmation(input_password, flag, password_length);
 		password_length = input_password.length();
 	}
@@ -82,14 +82,14 @@ void request4confirmation(string& input_password, bool& flag, int password_lengt
 {
 	if (password_length > SAFE_PASSWORD_LENGTH_RIGTH)
 	{
-		cout << TOO_HARD_TO_REMEMBER;				// если пароль слишком длинный, выводит предупреждение
+		cout << TOO_HARD_TO_REMEMBER;
 	}
 	else
 	{
-		cout << WEAK_PASSWORD;						// если пароль небезопасный, выводит предупреждение
+		cout << WEAK_PASSWORD;
 	}
-	cout << PASSWORD_CONFIRMATION_P1<<" ("<<input_password<<")"<<PASSWORD_CONFIRMATION_P2;// запрос на подтверждение пароля пользователем
-	int choice = inputIntNumbers(1, 2);							// выбор пользователя
+	cout << PASSWORD_CONFIRMATION_P1<<" ("<<input_password<<")"<<PASSWORD_CONFIRMATION_P2;
+	int choice = inputIntNumbers(1, 2);
 	switch (choice)
 	{
 	case 1: flag = false; break;
@@ -111,7 +111,7 @@ bool isLoginUnique(vector<Account>acc, string input_login)
 bool isPasswordStrong(string input_password, int password_length)
 {
 	int special_symbols = 0;
-	for (int current_sign = 0; current_sign < password_length; current_sign++)					// считает кол-во спец. символов в пароле
+	for (int current_sign = 0; current_sign < password_length; current_sign++)					// checks special symbols in password
 	{
 		if ((input_password[current_sign] >= 33 && input_password[current_sign] <= 47) ||
 			(input_password[current_sign] >= 58 && input_password[current_sign] <= 64) ||
@@ -122,7 +122,7 @@ bool isPasswordStrong(string input_password, int password_length)
 		}
 	}
 	int capital_letters = 0;
-	for (int current_sign = 0; current_sign < password_length; current_sign++)								// считает кол-во заглавных букв в пароле
+	for (int current_sign = 0; current_sign < password_length; current_sign++)								// checks 4 capital letters in password
 	{
 		if ((input_password[current_sign] >= 'A' && input_password[current_sign] <= 'Z') ||
 			(input_password[current_sign] >= 'А' && input_password[current_sign] <= 'Я'))
@@ -131,7 +131,7 @@ bool isPasswordStrong(string input_password, int password_length)
 		}
 	}
 	int small_letters = 0;
-	for (int current_sign = 0; current_sign < password_length; current_sign++)								// считает кол-во строчных букв в пароле
+	for (int current_sign = 0; current_sign < password_length; current_sign++)								// checks for lower letters 
 	{
 		if ((input_password[current_sign] >= 'a' && input_password[current_sign] <= 'z') ||
 			(input_password[current_sign] >= 'а' && input_password[current_sign] <= 'я'))
@@ -140,7 +140,7 @@ bool isPasswordStrong(string input_password, int password_length)
 		}
 	}
 	int numbers = 0;
-	for (int current_sign = 0; current_sign < password_length; current_sign++)								// считает кол-во цифр в пароле
+	for (int current_sign = 0; current_sign < password_length; current_sign++)								// checks 4 numbers in password
 	{
 		if (input_password[current_sign] >= '0' && input_password[current_sign] <= '9')
 		{
@@ -155,7 +155,7 @@ bool isPasswordStrong(string input_password, int password_length)
 }
 string generateSalt()
 {
-	string symbols_set = getSymbols4Salt();							// набор символов для генерации соли
+	string symbols_set = getSymbols4Salt();
 	srand(time(NULL));
 
 	string salt;
@@ -163,7 +163,7 @@ string generateSalt()
 
 	for (int i = 0; i < SALT_SIZE; i++)
 	{
-		salt.push_back(symbols_set[rand() % SYMBOLS_SIZE]);			// добавляет в строку соли случайный символ из ранее отобранных
+		salt.push_back(symbols_set[rand() % SYMBOLS_SIZE]);			// adds random symbol to salt from symbols_set
 	}
 	return salt;
 }
@@ -176,7 +176,7 @@ string getSymbols4Salt()
 	char small_letter = 'a';
 	char num = '0';
 
-	for (int i = 0; i < ALPHABET_AMOUNT; i++)							//собирает набор символов для соли из A-Z, a-z и 0-9 
+	for (int i = 0; i < ALPHABET_AMOUNT; i++)							//fills symbols_set with random symbols A-Z and 0-9
 	{
 		symbols_set.push_back(capital_letter++);
 		symbols_set.push_back(small_letter++);
@@ -196,23 +196,23 @@ string showOrHidePassword()
 	int choice = inputIntNumbers(1, 2);
 	switch (choice)
 	{
-	case 1: input_password=justEnterString(); break;
-	case 2: 
+	case 1: input_password = oneWordInput(justEnterChar); break; //shows password on enter
+	case 2: //replaces input symbols with * but only on screen
 		char temp;
 		do
 		{
 			temp = _getch();
-			if (temp == '\b')
+			if (temp == '\b') //removes * from the screen if backspace key's pressed
 			{
 				input_password.erase(input_password.end() - 1);
 				cout << temp << " " << temp;
 			}
-			else if (temp!='\r')
+			else if (temp!='\r') // if enter key isn't pressed writes symbol down in input_password
 			{
 				input_password.push_back(temp);
 				cout << "*";
 			}
-		} while (temp != '\r'); cout << endl;
+		} while (temp != '\r'); cout << endl; //when enter key's pressed finishes input process
 	}
 	return input_password;
 }
@@ -231,27 +231,26 @@ bool areYouNew(Account temp)
 
 void logIn(vector<Account>acc, Account& guest)
 {
-	bool flag = true;
 	clearScreen();
-	do
+	while(true)
 	{
 		cout << LOGIN_REQUEST;
-		guest.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterString);
+		guest.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterChar);
 		clearScreen();
 		cout << PASSWORD_REQUEST;
-		string input_password = justEnterString();
-		if (isLoginUnique(acc, guest.login)||!isPasswordCorrect(acc, guest, input_password))
+		string input_password = oneWordInput(justEnterChar);
+		if (isLoginUnique(acc, guest.login)||!isPasswordCorrect(acc, guest, input_password)) //checks if guest.login exists in system and the following password mathes
 		{
 			if (wantToGoBack(WRONG_ENTER+GO_BACK_QUESTION))
 			{
-				if (!guest.access)
+				if (!guest.access) //log-ins in system 4 the first time - guest.access==false
 				{
 					showOptionsOnEnter(acc, guest);
 					break;
 				}
-				else
+				else //if user with access tries to change own log-in, fails in verification and wants to return
 				{
-					guest.active = false;
+					guest.active = false; 
 					break;
 				}
 			}
@@ -259,17 +258,19 @@ void logIn(vector<Account>acc, Account& guest)
 			cout << TRY_AGAIN_M;
 			continue;
 		}
-		guest.active = true;
-		flag = false;
-	} while (flag);
+		guest.active = true; //successful log-in means you're active user in system
+		break;
+	}
 }
 bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password)
 {
 	int vec_size = acc.size();
 	for (int current_account = 0; current_account < vec_size; current_account++)
 	{
+		//comparing input_password to all passwords in system preliminary using appropriate salt
 		if (makePasswordHashedAndSalty(input_password,acc[current_account].salt) == acc[current_account].hashed_salty_password)
 		{
+			//assigning matched account with guest account
 			guest.hashed_salty_password = acc[current_account].hashed_salty_password;
 			guest.salt = acc[current_account].salt;
 			guest.role = acc[current_account].role;
@@ -289,6 +290,7 @@ void showAccountArray(vector<Account>acc)
 	for (int curr_acc = 0; curr_acc < vec_size; curr_acc++)
 	{
 		roleAccessConverter(acc, curr_acc,temp_role,temp_access);
+		//making strings with spaces to format output in table
 		string temp_4_login(LOGIN_LENGTH_LIMIT - acc[curr_acc].login.size(), ' ');
 		string role_length(ROLE_LENGTH_LIMIT - temp_role.size(), ' ');
 		string access_length(ACCESS_LENGTH_LIMIT - temp_access.size(), ' ');
@@ -327,27 +329,27 @@ void addAccountInArray(vector<Account>& acc, Account& guest)
 	int access_choice = inputIntNumbers(1, 2);
 	if (access_choice == 1 && role_choice == 1)
 	{
-		signUp(acc, adminCase, guest);
+		signUp(acc, adminCase, guest); //signing account up as an admin
 	}
 	else if (access_choice == 2 && role_choice == 1)
 	{
-		signUp(acc, blockedAdminCase, guest);
+		signUp(acc, blockedAdminCase, guest); //signing account up as a blocked admin
 	}
 	else if (access_choice == 1 && role_choice == 2)
 	{
-		signUp(acc, userCase, guest);
+		signUp(acc, userCase, guest); //signing account up as a user
 	}
 	else if (access_choice == 2 && role_choice == 2)
 	{
-		signUp(acc, newAccCase, guest);
+		signUp(acc, newAccCase, guest); //signing account up as a new user
 	}
 }
 void pickAccountInArray(string message4search,string message, vector<Account>&acc, void (*changeAccount)(vector<Account>&acc,int acc_num))
 {
-	int counter = 0;
+	int counter = 1; //stores amount of accounts to choose from
 	string search_to_edit;
 	searchAccount(search_to_edit,message4search,acc,counter);
-	if (search_to_edit == "0") return; 
+	if (search_to_edit == "0") return; //search_to_edit's assigned "0" if user wants to go back
 	clearScreen();
 	cout << message;
 	int choice = inputIntNumbers(1, counter);
@@ -371,14 +373,16 @@ void editAccountMenu(vector<Account>& acc, int acc_num)
 	char sure = _getch();
 	cout << sure;
 	getchar();
-	string login_savespot = acc[acc_num].login;
+	string login_savespot = acc[acc_num].login; //saves login in case to undo its change
 	if (sure == '1')
 	{
 		switch (choice)
 		{
 		case 1: editLogin(login_savespot,acc,acc_num); break;
-		case 2:	editRole(acc,acc_num); break;
-		case 3: editAccess(acc,acc_num); break;
+		case 2: edit(acc,acc_num,&Account::role,DONT_CHANGE_YOUR_ROLE,ROLE); break; //edit role
+		case 3: edit(acc,acc_num,&Account::access, DONT_CHANGE_YOUR_ACCESS, ACCESS); break; //edit access
+		//case 2:	editRole(acc,acc_num); break;
+		//case 3: editAccess(acc,acc_num); break;
 		case 0: break;
 		}
 	}
@@ -392,8 +396,8 @@ void editLogin(string login_savespot, vector<Account>&acc, int acc_num)
 		clearScreen();
 		showAccountArray(acc);
 		cout << LOGIN_REQUEST;
-		acc[acc_num].login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED, justEnterString);
-		if (acc[acc_num].login == "0")
+		acc[acc_num].login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED,justEnterChar);
+		if (acc[acc_num].login == "0") //if user wants to undo/go back
 		{
 			acc[acc_num].login = login_savespot;
 			return;
@@ -404,48 +408,72 @@ void editLogin(string login_savespot, vector<Account>&acc, int acc_num)
 		}
 	}
 }
-void editRole(vector<Account>& acc, int acc_num)
+
+template <typename T>
+void edit(vector<Account>& acc, int acc_num, T Account::*field, string dont_message, string input_message)
 {
-	int role_choice = 0;
+	int field_choice = 0;
 	clearScreen();
 	showAccountArray(acc);
-	if (acc[acc_num].active)
+	if (acc[acc_num].*field) //if current user tries to change own role/access
 	{
-		cout << DONT_CHANGE_YOUR_ROLE;
+		cout << dont_message; //prints changing own role is forbidden
 		return;
 	}
-	cout << ROLE;
-	role_choice = inputIntNumbers(1, 2);
-	if (role_choice == 1)
+	cout << input_message;
+	field_choice = inputIntNumbers(1, 2);
+	if (field_choice == 1)
 	{
-		acc[acc_num].role = 1;
+		acc[acc_num].*field = 1;
 	}
 	else
 	{
-		acc[acc_num].role = 0;
+		acc[acc_num].*field = 0; //default role/access
 	}
 }
-void editAccess(vector<Account>& acc, int acc_num)
-{
-	int access_choice = 0;
-	clearScreen();
-	showAccountArray(acc);
-	if (acc[acc_num].active)
-	{
-		cout << DONT_CHANGE_YOUR_ACCESS;
-		return;
-	}
-	cout << ACCESS;
-	access_choice = inputIntNumbers(1, 2);
-	if (access_choice == 1)
-	{
-		acc[acc_num].access = 1;
-	}
-	else
-	{
-		acc[acc_num].access = 0;
-	}
-}
+
+//void editRole(vector<Account>& acc, int acc_num)
+//{
+//	int role_choice = 0;
+//	clearScreen();
+//	showAccountArray(acc);
+//	if (acc[acc_num].active) //if current user tries to change own role
+//	{
+//		cout << DONT_CHANGE_YOUR_ROLE; //prints changing own role is forbidden
+//		return;
+//	}
+//	cout << ROLE;
+//	role_choice = inputIntNumbers(1, 2);
+//	if (role_choice == 1)
+//	{
+//		acc[acc_num].role = 1;
+//	}
+//	else
+//	{
+//		acc[acc_num].role = 0; //default role
+//	}
+//}
+//void editAccess(vector<Account>& acc, int acc_num)
+//{
+//	int access_choice = 0;
+//	clearScreen();
+//	showAccountArray(acc);
+//	if (acc[acc_num].active)
+//	{
+//		cout << DONT_CHANGE_YOUR_ACCESS;
+//		return;
+//	}
+//	cout << ACCESS;
+//	access_choice = inputIntNumbers(1, 2);
+//	if (access_choice == 1)
+//	{
+//		acc[acc_num].access = 1;
+//	}
+//	else
+//	{
+//		acc[acc_num].access = 0;
+//	}
+//}
 
 void searchAccount(string& search_to_edit,string message,vector<Account>& acc, int&counter)
 {
@@ -453,20 +481,21 @@ void searchAccount(string& search_to_edit,string message,vector<Account>& acc, i
 	showAccountArray(acc);
 	cout << message;
 	string temp_role, temp_access;
-	search_to_edit= check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED, justEnterString);
-	if (search_to_edit == "0") return;
+	search_to_edit= check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED,justEnterChar); //returns "0" if user wants to go back
+	if (search_to_edit == "0") return; //if user wants to go back
 	int amount_of_accounts = acc.size();
 	int search_size = search_to_edit.size();
 	clearScreen();
 	cout <<"--№--|"<< TABLE_ACCOUNTS_HEADER;
-	for (int current_account = 0; current_account < amount_of_accounts; current_account++)
+	for (int current_account = 0; current_account < amount_of_accounts; current_account++) //goes through all accounts
 	{
-		for (int current_letter = 0; current_letter < search_size; current_letter++)
+		for (int current_letter = 0; current_letter < search_size; current_letter++) //compares letters in search_input and each account
 		{
-			if (search_to_edit[current_letter] != acc[current_account].login[current_letter])
+			if (search_to_edit[current_letter] != acc[current_account].login[current_letter]) //if any letter in account doesn't match
 			{
-				break;
+				break; //moves on to the next account
 			}
+			//found accounts output (more info in showAccountArray function)
 			roleAccessConverter(acc, current_account, temp_role, temp_access);
 			string temp_4_login(LOGIN_LENGTH_LIMIT - acc[current_account].login.size(), ' ');
 			string role_length(ROLE_LENGTH_LIMIT - temp_role.size(), ' ');
@@ -474,7 +503,7 @@ void searchAccount(string& search_to_edit,string message,vector<Account>& acc, i
 			string counter_length(COUNTER_LENGTH_LIMIT - to_string(acc[current_account].search_counter).size(), ' ');
 			cout <<counter_length<<acc[current_account].search_counter++ << "|" << acc[current_account].login << temp_4_login << "|" <<
 				temp_role << role_length << "|" << temp_access << access_length << "|\n";
-			counter++;
+			counter++; //increasing counter of accounts in list
 		}
 	}
 }
@@ -495,13 +524,13 @@ void deleteAccountInArray(vector<Account>& acc,int acc_num)
 }
 void changeLogin(vector<Account>& acc, Account& guest)
 {
-	logIn(acc, guest);
-	if(guest.active)
+	logIn(acc, guest); //you need to verify own log-in to be able to change it - safety measure
+	if(guest.active) //log in makes guest.active=false if unsuccessful
 	{
 		int vec_size = acc.size();
-		for (int curr_acc = 0; curr_acc < vec_size; curr_acc++)
+		for (int curr_acc = 0; curr_acc < vec_size; curr_acc++) //searching for current (active) account in system
 		{
-			if (acc[curr_acc].active == 1)
+			if (acc[curr_acc].active == 1) 
 			{
 				clearScreen();
 				cout << YOU_SURE;
@@ -510,7 +539,7 @@ void changeLogin(vector<Account>& acc, Account& guest)
 				getchar();
 				if (sure == '1')
 				{
-					if (acc[curr_acc].role == 1)
+					if (acc[curr_acc].role == 1) //saving previous role of account
 					{
 						deleteAccountInArray(acc, curr_acc);
 						signUp(acc, adminCase, guest);
@@ -529,15 +558,15 @@ void changeLogin(vector<Account>& acc, Account& guest)
 	}
 	else
 	{
-		guest.active = true;
+		guest.active = true; //if log-in verification is unsuccessful (returns guest.active=false) makes guest.active=true again
 	}
 }
 
 void readAccountFile(vector<Account>&acc)
 {
 	int amount_of_accounts = countStructuresInAccountFile();
-	acc.reserve(amount_of_accounts);				// резервируется память под массив аккаунтов
-	ifstream f_in(ACCOUNT_FILE_NAME, ios::in);			//открывает файл в режиме чтения
+	acc.reserve(amount_of_accounts);	
+	ifstream f_in(ACCOUNT_FILE_NAME, ios::in);
 	while (!f_in.eof())
 	{
 		Account temp;
@@ -549,7 +578,7 @@ void readAccountFile(vector<Account>&acc)
 void writeEndAccountFile(Account new_account, void (*roleCase)(Account& new_acc))
 {
 	roleCase(new_account);
-	ofstream f_add(ACCOUNT_FILE_NAME, ios::app);			// открывает файл для дозаписи
+	ofstream f_add(ACCOUNT_FILE_NAME, ios::app);
 	if(f_add.tellp()!=NULL)
 	{
 		f_add << endl;
@@ -598,7 +627,7 @@ void writeAccountFile(vector<Account> acc)
 			acc.at(i).role << " " <<
 			acc.at(i).access << " " <<
 			acc.at(i).new_acc;
-		if (i < vec_size - 1)
+		if (i < vec_size - 1) //adds endl to every structure in file except the last one
 		{
 			f_out <<endl;
 		}
@@ -608,19 +637,19 @@ void writeAccountFile(vector<Account> acc)
 int countStructuresInAccountFile()
 {
 	ifstream f_in(ACCOUNT_FILE_NAME, ios::in);
-	int amount_of_accounts = 0;							//кол-во аккаунтов в массиве, считываемом из файла
+	int amount_of_accounts = 0;
 	if (f_in.is_open())
 	{
 		string temp;
-		while (getline(f_in, temp))						//считывает текстовый файл построчно
+		while (getline(f_in, temp))						//reads file by lines
 		{
-			amount_of_accounts++;						//если удалось считать строку, инкриментирует кол-во аккаунтов
+			amount_of_accounts++;						//if line's read successfuly increases amount_of_accounts
 		}
 	}
-	else
+	else //if file is not opening
 	{
 		clearScreen();
-		cout << NO_ACCOUNTS_CASE;						// в случае невозможности считать файл в режиме чтения выводится сообщение
+		cout << NO_ACCOUNTS_CASE;
 		f_in.close();
 		setDefaultAccount();
 	}
