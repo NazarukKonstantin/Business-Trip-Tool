@@ -20,11 +20,9 @@ int main()
 		processTripFile(acc,guest,emp, is_file_open, exit_token);
 		if (!exit_token)
 		{
-			do
-			{
-				processMainMenu(emp, acc, guest);
-				writeTripFile(emp);
-			} while (!wantToGoBack());
+			processMainMenu(emp, acc, guest);
+			writeTripFile(emp);
+			clearScreen();
 		}
 	}
 	return 0;

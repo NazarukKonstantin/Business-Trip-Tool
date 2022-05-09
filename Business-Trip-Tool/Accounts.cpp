@@ -3,12 +3,7 @@
 void showOptionsOnEnter(vector<Account>acc, Account& guest)
 {
 	clearScreen();
-	cout << SIGN_UP_OR_LOG_IN;
-	proceedPickedOption(acc, guest);
-}
-void proceedPickedOption(vector<Account>acc, Account& guest)
-{
-	int choice = inputIntNumbers(0, 2);
+	int choice = inputIntNumbers(SIGN_UP_OR_LOG_IN,0, 2);
 	switch (choice)
 	{
 	case 1: signUp(acc, newAccCase, guest); break;
@@ -19,12 +14,7 @@ void proceedPickedOption(vector<Account>acc, Account& guest)
 void showOptionsOnEnter(vector<Account>acc, Account& guest, bool& exit_token)
 {
 	clearScreen();
-	cout << SIGN_UP_OR_LOG_IN;
-	proceedPickedOption(acc,guest,exit_token);
-}
-void proceedPickedOption(vector<Account>acc, Account& guest,bool& exit_token)
-{
-	int choice = inputIntNumbers(0, 2);
+	int choice = inputIntNumbers(SIGN_UP_OR_LOG_IN,0, 2);
 	switch (choice)
 	{
 	case 1: signUp(acc,newAccCase, guest); break;
@@ -43,24 +33,21 @@ void setDefaultAccount()
 }
 
 
-void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& guest)
+void signUp(vector<Account>&acc, void(*roleCase)(Account& new_acc), Account& guest)
 {
 	clearScreen();
-	cout << LOGIN_REQUEST;
 	Account new_acc;
-	new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterChar); //returns "0" if user wants to go back
-	if (new_acc.login=="0")
+	new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT,justEnterChar,LOGIN_REQUEST,LOGIN_SIZE_EXCEEDED); //returns "0" if user wants to go back
+	if (new_acc.login==NO_INFO)
 	{
-		showOptionsOnEnter(acc, guest);
 		return;
 	}
 	while (!isLoginUnique(acc,new_acc.login))
 	{
 		cout << EXISTING_LOGIN_ERROR;
-		new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED,justEnterChar); //returns "0" if user wants to go back
-		if (new_acc.login == "0")
+		new_acc.login = check4TooBigString(LOGIN_LENGTH_LIMIT, justEnterChar, LOGIN_REQUEST, LOGIN_SIZE_EXCEEDED); //returns "0" if user wants to go back
+		if (new_acc.login == NO_INFO)
 		{
-			showOptionsOnEnter(acc, guest);
 			return;
 		}
 	}
@@ -76,6 +63,7 @@ void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& gues
 	}
 	new_acc.salt = generateSalt();
 	new_acc.hashed_salty_password = makePasswordHashedAndSalty(input_password,new_acc.salt);
+	acc.push_back(new_acc);
 	writeEndAccountFile(new_acc, roleCase);
 }
 void request4confirmation(string& input_password, bool& flag, int password_length)
@@ -88,8 +76,7 @@ void request4confirmation(string& input_password, bool& flag, int password_lengt
 	{
 		cout << WEAK_PASSWORD;
 	}
-	cout << PASSWORD_CONFIRMATION_P1<<" ("<<input_password<<")"<<PASSWORD_CONFIRMATION_P2;
-	int choice = inputIntNumbers(1, 2);
+	int choice = inputIntNumbers(PASSWORD_CONFIRMATION_P1 + " (" + input_password +")" + PASSWORD_CONFIRMATION_P2,1, 2);
 	switch (choice)
 	{
 	case 1: flag = false; break;
@@ -192,8 +179,7 @@ string showOrHidePassword()
 {
 	string input_password;
 	clearScreen();
-	cout << HIDE_OR_SHOW_PASSWORD;
-	int choice = inputIntNumbers(1, 2);
+	int choice = inputIntNumbers(HIDE_OR_SHOW_PASSWORD,1, 2);
 	switch (choice)
 	{
 	case 1: input_password = oneWordInput(justEnterChar); break; //shows password on enter
@@ -202,7 +188,7 @@ string showOrHidePassword()
 		do
 		{
 			temp = _getch();
-			if (temp == '\b') //removes * from the screen if backspace key's pressed
+			if (temp == '\b'&&input_password.size()!=0) //removes * from the screen if backspace key's pressed
 			{
 				input_password.erase(input_password.end() - 1);
 				cout << temp << " " << temp;
@@ -234,8 +220,8 @@ void logIn(vector<Account>acc, Account& guest)
 	clearScreen();
 	while(true)
 	{
-		cout << LOGIN_REQUEST;
-		guest.login = check4TooBigString(LOGIN_LENGTH_LIMIT,LOGIN_SIZE_EXCEEDED,justEnterChar);
+		guest.login = check4TooBigString(LOGIN_LENGTH_LIMIT,justEnterChar, LOGIN_REQUEST, LOGIN_SIZE_EXCEEDED);
+		if (guest.login == NO_INFO) return;
 		clearScreen();
 		cout << PASSWORD_REQUEST;
 		string input_password = oneWordInput(justEnterChar);
@@ -323,10 +309,8 @@ void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, s
 }
 void addAccountInArray(vector<Account>& acc, Account& guest)
 {
-	cout << ROLE;
-	int role_choice = inputIntNumbers(1, 2);
-	cout << ACCESS;
-	int access_choice = inputIntNumbers(1, 2);
+	int role_choice = inputIntNumbers(ROLE,1, 2);
+	int access_choice = inputIntNumbers(ACCESS,1, 2);
 	if (access_choice == 1 && role_choice == 1)
 	{
 		signUp(acc, adminCase, guest); //signing account up as an admin
@@ -351,8 +335,7 @@ void pickAccountInArray(string message4search,string message, vector<Account>&ac
 	searchAccount(search_to_edit,message4search,acc,counter);
 	if (search_to_edit == "0") return; //search_to_edit's assigned "0" if user wants to go back
 	clearScreen();
-	cout << message;
-	int choice = inputIntNumbers(1, counter);
+	int choice = inputIntNumbers(message,1, counter);
 	int vec_size = acc.size();
 	for (int acc_num = 0; acc_num < vec_size; acc_num++)
 	{
@@ -367,12 +350,11 @@ void editAccountMenu(vector<Account>& acc, int acc_num)
 {
 	clearScreen();
 	showAccountArray(acc);
-	cout << EDIT_ACCOUNT_MENU;
-	int choice = inputIntNumbers(0,3);
+	int choice = inputIntNumbers(EDIT_ACCOUNT_MENU,0,3);
 	cout << YOU_SURE;
 	char sure = _getch();
 	cout << sure;
-	getchar();
+	system("pause");
 	string login_savespot = acc[acc_num].login; //saves login in case to undo its change
 	if (sure == '1')
 	{
@@ -395,9 +377,8 @@ void editLogin(string login_savespot, vector<Account>&acc, int acc_num)
 	{
 		clearScreen();
 		showAccountArray(acc);
-		cout << LOGIN_REQUEST;
-		acc[acc_num].login = check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED,justEnterChar);
-		if (acc[acc_num].login == "0") //if user wants to undo/go back
+		acc[acc_num].login = check4TooBigString(LOGIN_LENGTH_LIMIT, justEnterChar, LOGIN_REQUEST, LOGIN_SIZE_EXCEEDED);
+		if (acc[acc_num].login == NO_INFO) //if user wants to undo/go back
 		{
 			acc[acc_num].login = login_savespot;
 			return;
@@ -420,8 +401,7 @@ void edit(vector<Account>& acc, int acc_num, T Account::*field, string dont_mess
 		cout << dont_message; //prints changing own role is forbidden
 		return;
 	}
-	cout << input_message;
-	field_choice = inputIntNumbers(1, 2);
+	field_choice = inputIntNumbers(input_message,1, 2);
 	if (field_choice == 1)
 	{
 		acc[acc_num].*field = 1;
@@ -479,10 +459,9 @@ void searchAccount(string& search_to_edit,string message,vector<Account>& acc, i
 {
 	clearScreen();
 	showAccountArray(acc);
-	cout << message;
 	string temp_role, temp_access;
-	search_to_edit= check4TooBigString(LOGIN_LENGTH_LIMIT, LOGIN_SIZE_EXCEEDED,justEnterChar); //returns "0" if user wants to go back
-	if (search_to_edit == "0") return; //if user wants to go back
+	search_to_edit= check4TooBigString(LOGIN_LENGTH_LIMIT, justEnterChar, message, LOGIN_SIZE_EXCEEDED); //returns "0" if user wants to go back
+	if (search_to_edit == NO_INFO) return; //if user wants to go back
 	int amount_of_accounts = acc.size();
 	int search_size = search_to_edit.size();
 	clearScreen();
@@ -515,7 +494,7 @@ void deleteAccountInArray(vector<Account>& acc,int acc_num)
 	char sure;
 	sure = _getch();
 	cout << sure;
-	getchar();
+	system("pause");
 	if (sure == '1')
 	{
 		acc.erase(acc.begin() + acc_num);
@@ -536,7 +515,7 @@ void changeLogin(vector<Account>& acc, Account& guest)
 				cout << YOU_SURE;
 				char sure= _getch();
 				cout << sure;
-				getchar();
+				system("pause");
 				if (sure == '1')
 				{
 					if (acc[curr_acc].role == 1) //saving previous role of account
@@ -641,15 +620,16 @@ int countStructuresInAccountFile()
 	if (f_in.is_open())
 	{
 		string temp;
-		while (getline(f_in, temp))						//reads file by lines
+		while (getline(f_in, temp))	//reads file by lines
 		{
-			amount_of_accounts++;						//if line's read successfuly increases amount_of_accounts
+			amount_of_accounts++;	//if line's read successfuly increases amount_of_accounts
 		}
 	}
 	else //if file is not opening
 	{
 		clearScreen();
 		cout << NO_ACCOUNTS_CASE;
+		system("pause");
 		f_in.close();
 		setDefaultAccount();
 	}

@@ -38,7 +38,7 @@ const string NO_FILE_ACCESS = "Файл пуст или недоступен для чтения. Выберите дал
 //--------------------DATA INPUT MESSAGES-------------------------------------------------------------------------------
 const string ENTER_SURNAME="Введите фамилию работника:\n";
 const string ENTER_NAME="Введите имя работника:\n";
-const string ENTER_PATRONYMIC="Введите отчество работника(если у работника нет отчества, введите \"No\")\n";
+const string ENTER_PATRONYMIC="Введите отчество работника(если у работника нет отчества, введите \"NO\")\n";
 const string ENTER_YEAR="Введите год командировки:\n";
 const string ENTER_MONTH="Введите месяц командировки:\n";
 const string ENTER_TOWN="Введите город назначения командировки:\n";
@@ -61,10 +61,10 @@ const string TRIP_MENU_ROLE_1 = " 1.Просмотреть все командировочные данные\n 2.О
 const string DATA_CHANGE_MENU_ROLE_1 = " 1.Добавить запись\n 2.Изменить запись\n 3.Удалить запись\n 0.Выйти в меню работы с командировочными данными\n";
 const string EDIT_DATA_MENU = "Изменить:\n 1.Фамилию\n 2.Имя\n 3.Отчество\n 4.Год\n 5.Месяц\n 6.Кол-во дней командировки\n 7.Сумму на день\n\
  8.Валюту\n 9.Город назначения\n 10.Все данные о сотруднике\n 0.Вернуться в меню изменения данных\n";
-const string SEARCH_MENU="Искать данные по:\n 1.Фамилии\n 2.Имени \n3.Отчеству\n 4.Городу назначения\n 5.Месяцу поездки(Название месяца)\n\
-6.Месяцу поездки(Номер)\n 7.Году поездки\n 8.Сумме в день на поездку\n 9.Валюте\n 10.Длительности поездки(в днях)\n 0.Выход в меню работы с командировочными данными\n";
+const string SEARCH_MENU="Искать данные по:\n 1.Фамилии\n 2.Имени \n 3.Отчеству\n 4.Городу назначения\n 5.Месяцу поездки(Название месяца)\n\
+ 6.Месяцу поездки(Номер)\n 7.Году поездки\n 8.Сумме в день на поездку\n 9.Валюте\n 10.Длительности поездки(в днях)\n 0.Выход в меню работы с командировочными данными\n";
 const string SORT_MENU="Сортировать данные по:\n 1.Фамилии\n 2.Имени\n 3.Отчеству\n 4.Длительности командировки(в днях)\n\
- 5.Сумме командировочных расходов в день\n 6.Валюте\n 7.Месяцам\n 8.Городам\n 0.Выйти в меню работы с командировочными данными\n";
+ 5.Сумме командировочных расходов в день\n 6.Валюте\n 7.Месяцам\n 8.Годам\n 9.Городам\n 0.Выйти в меню работы с командировочными данными\n";
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 const string TABLE_TRIP_HEADER = "|-------|Ф.И.О.|-------|---|ГОД|---|---|МЕСЯЦ|---|-|КОЛ-ВО ДНЕЙ ПОЕЗДКИ|-|-|СУММА НА ДЕНЬ|-|-------|ГОРОД|-------|\n";
 
@@ -84,27 +84,30 @@ const string SB_SURNAME="фамилии:\n";
 const string SB_NAME="имени:\n";
 const string SB_PATRONYMIC="отчеству:\n";
 const string SB_DAYS="длительности командировки (в днях):\n";
-const string SB_MONEY="сумме командировочных расходов в день\n";
-const string SB_CURRENCY = "валюте\n";
-const string SB_MONTH="месяцам\n";
-const string SB_TOWN="городам\n";
+const string SB_MONEY="сумме командировочных расходов в день:\n";
+const string SB_CURRENCY = "валюте:\n";
+const string SB_MONTH="месяцам:\n";
+const string SB_YEAR = "годам:\n";
+const string SB_TOWN="городам:\n";
 
+const vector<string> MONTH_SET = { "January","February","March","April","May","June","July","August","September","October",
+	"November","December","Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь" };
 
 const string WRONG_MONTH = "Название месяца введено неверно, попробуйте ещё раз:\n";
+const string WRONG_DAYS_P1 = "Ошибка! В данном месяце ";
+const string WRONG_DAYS_P2 = " не содержится такое кол-во дней\n";
 
 //-----NUMERIC CONSTANTS-------
 const int F_I_O_LINE_LIMIT = 22;
 const int YEAR_LINE_LIMIT = 11;
 const int MONTH_LINE_LIMIT = 13;
-const int DAYS_LINE_LIMIT = 21;
-const int MONEY_LINE_LIMIT = 14;
+const int DAYS_LINE_LIMIT = 23;
+const int MONEY_LINE_LIMIT = 17;
 const int TOWN_LINE_LIMIT = 21;
 const int CURRENCY_LIMIT = 3;
 const int FREQUENCY_LINE_LIMIT = 20;
 
 bool canUserContinue(Account& guest, bool exit_token); //checks user's access and log-in condition to let user use the system
-
-void checkPatronymic(Trip_Man& temp); //checks if employer's got patronymic (patronymic input)
 
 void enterEmployees(vector <Trip_Man>& emp);
 void enter1Employee(Trip_Man& temp);
@@ -120,18 +123,21 @@ void processAccountMenu(vector<Account>& acc, Account& guest);
 void processTripMenu(vector<Trip_Man> emp, Account guest);
 void processDataChangeMenu(vector<Trip_Man>& emp);
 
-void showTripArray(vector<Trip_Man>emp);
-void showOneEmployee(vector<Trip_Man>emp, int curr_emp);
+void showTripArray(vector<Trip_Man>emp, int c_length=0);
+string doubleToString(double value);
+void showOneEmployee(vector<Trip_Man>emp, int curr_emp, int c_length = 0);
 void countMoney4MonthX(vector<Trip_Man> emp);
 string countMoney(vector<Month_Money> value);
 
 void sortTowns(vector<Trip_Man> emp);
 
 int enterMonth(vector<Trip_Man> emp,string message, string& month);
-int convertMonthName2Number(string month, int str_size);
+int convertMonthName2Number(string& month, int str_size);
 void fillTowns2SortArray(vector<Town_Frequency>& town_set,vector<Trip_Man> emp, int year_x, int year_y, int X, int Y);
+//write1TownInTownSet - filling town set with towns visited since month X of year X till month Y of year_y
 void write1TownInTownSet(vector<Trip_Man> emp, vector<Town_Frequency>& town_set, Town_Frequency temp, int emp_size, int X, int year_x);
-void writeTownsInSortArray(vector<Town_Frequency> town_set, vector<Town_Frequency>& picked_towns);
+//writeTownsInSortArray - filling new array with unique towns of town_set array
+void writeTownsInSortArray(vector<Town_Frequency> town_set, vector<Town_Frequency>&picked_towns);
 //bool sortByFrequency(Town_Frequency first, Town_Frequency second, int choice=1);
 void showSortedTowns(vector<Town_Frequency> picked_towns, int X, int Y, int year_x, int year_y, vector<Trip_Man>emp);
 
@@ -165,18 +171,20 @@ void sortData(string message, vector<Trip_Man>emp, T Trip_Man::* temp);
 //bool sortByTown(Trip_Man first, Trip_Man second, int choice);
 
 template <typename T, typename J>
-void mySort(vector<J>vec, T J::* temp, int direction=1);
+void mySort(vector<J>&vec, T J::* temp, int direction=1);
 
 void addData(vector<Trip_Man>& emp);
 
 void pickDataInArray(string message, vector<Trip_Man>& emp, void (*changeData)(vector<Trip_Man>& emp, int curr_emp));
 void editDataMenu(vector<Trip_Man>& emp, int curr_emp);
 void editData(string message, vector<Trip_Man>& emp, int curr_emp, void(*inputNewData)(Trip_Man& temp));
+void formatString(string& temp);
 void inputSurname(Trip_Man& temp);
 void inputName(Trip_Man& temp);
-void inputPatronymic(Trip_Man& temp);
+void inputPatronymic(Trip_Man& temp); //also checks if employer's got patronymic (patronymic input)
 void inputYear(Trip_Man& temp);
 void inputMonth(Trip_Man& temp);
+bool isMonth(string input_month);
 void inputDays(Trip_Man& temp);
 void inputMoney(Trip_Man& temp);
 void inputCurrency(Trip_Man& temp);

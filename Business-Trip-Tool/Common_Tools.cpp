@@ -2,30 +2,29 @@
 
 bool wantToGoBack(string message)
 {
-	cout << message;
-	int choice = inputIntNumbers(1, 2);
+	int choice = inputIntNumbers(message,1, 2);
 	if (choice == 1)
 	{
-		clearScreen();
 		return true;
 	}
-	clearScreen();
 	return false;
 }
 
-string check4TooBigString(int limit,string message, char(*inputCond)())
+string check4TooBigString(int limit,char(*inputCond)(), string input_message,string error_message)
 {
+	cout << input_message;
 	string temp = oneWordInput(inputCond);
 	while (temp.size() > limit)
 	{
-		cout << message;
+		cout << error_message;
 		if(!wantToGoBack())
 		{ 
+			cout << input_message;
 			temp = oneWordInput(inputCond);
 		}
 		else
 		{
-			return "0";
+			return NO_INFO;
 		}
 	}
 	return temp;
@@ -45,7 +44,7 @@ void clearScreen()
 	DWORD dwConSize;
 
 	// Get the number of character cells in the current buffer.
-	if (!GetConsoleScreenBufferInfo(hStdout, &csbi))
+	if (!GetConsoleScreenBufferInfo(hStdout, &csbi)) //returns false if an error occurs
 	{
 		return;
 	}
@@ -63,7 +62,7 @@ void clearScreen()
 	}
 
 	// Get the current text attribute.
-	if (!GetConsoleScreenBufferInfo(hStdout, &csbi))
+	if (!GetConsoleScreenBufferInfo(hStdout, &csbi)) //returns false if an error occurs
 	{
 		return;
 	}
@@ -82,26 +81,28 @@ void clearScreen()
 	SetConsoleCursorPosition(hStdout, coordScreen);
 }
 
-int inputIntNumbers(int l_border, int r_border)
+int inputIntNumbers(string message,int l_border, int r_border,string error_message)
 {
 	int temp=0;
 	while(true)
 	{
+		cout << message;
 		cin >> temp;
-		if (cin.get() == '\n')
+		if (cin.get() == '\n') //checks int input till enter key
 		{
-			if (doesFitInRange(temp, l_border, r_border))
+			if (doesFitInRange(temp, l_border, r_border)) //if input is successfuly read checks it to fit the range
 			{
 				return temp;
 			}
 			else
 			{
-				cout << ERROR_INPUT;
+				cout <<error_message;
 			}
 		}
 		else
 		{
-			cout << ERROR_INPUT;
+			cout << error_message;
+			clearStream();
 		}
 	}
 }
@@ -109,15 +110,16 @@ bool doesFitInRange(int temp, int l_border, int r_border)
 {
 	return ((temp >= l_border) && (temp <= r_border));
 }
-int inputIntNumbers(int limit)
+int inputIntNumbers(string message,int limit)
 {
 	int temp = 0;
 	while (true)
 	{
+		cout << message;
 		cin >> temp;
-		if (cin.get() == '\n')
+		if (cin.get() == '\n') //checks int input till enter key
 		{
-			if (doesFitInRange(temp, limit))
+			if (doesFitInRange(temp, limit)) //if input is successfuly read checks it to fit the max limit of symbols
 			{
 				return temp;
 			}
@@ -129,6 +131,7 @@ int inputIntNumbers(int limit)
 		else
 		{
 			cout << ERROR_INPUT;
+			clearStream();
 		}
 	}
 }
@@ -139,6 +142,45 @@ bool doesFitInRange(int temp, int limit)
 		return true;
 	}
 	return false;
+}
+double inputDouble(string message, int limit)
+{
+	string st;
+	char temp;
+	do
+	{
+		temp = _getch();
+		if (temp == '\b' && st.size() != 0) //removes * from the screen if backspace key's pressed
+		{
+			st.erase(st.end() - 1);
+			cout << temp << " " << temp;
+		}
+		else if (temp != '\r' && temp != ' ') // if enter key isn't pressed writes symbol down in input_password
+		{
+			if (temp >= '0' && temp <= '9')
+			{
+				cout << temp;
+				st.push_back(temp);
+			}
+			else if ((temp=='.'||temp==',')&&stoi(st))
+			{ 
+				cout << temp;
+				st.push_back(temp);
+				for (int i = 0; i < 2; i++)
+				{
+					temp = _getch();
+					if (temp >= '0' && temp <= '9')
+					{
+						cout << temp;
+						st.push_back(temp);
+					}
+				}
+				getchar();
+				temp = '\r';
+			}
+		}
+	} while (temp != '\r'); cout << endl; //when enter key's pressed finishes input process
+	return stod(st);
 }
 
 //string justEnterString(char(*inputCondition)())
@@ -185,7 +227,22 @@ char onlyLetterInput()
 	{
 		char temp = _getch();
 		if ((temp >= 'A' && temp <= 'Z') || (temp >= 'a' && temp <= 'z') ||
-			(temp >= 'À' && temp <= 'ß' || (temp >= 'à' && temp <= 'ÿ')))
+			(temp >= 'À' && temp <= 'ß') || (temp >= 'à' && temp <= 'ÿ')||
+			temp=='_'||temp=='-' || temp == '\b' || temp == '\r')
+		{
+			return temp;
+		}
+	}
+}
+char numberOrLetterInput()
+{
+	while (true)
+	{
+		char temp = _getch();
+		if ((temp >= 'A' && temp <= 'Z') || (temp >= 'a' && temp <= 'z') ||
+			(temp >= 'À' && temp <= 'ß') || (temp >= 'à' && temp <= 'ÿ') ||
+			(temp>='0'&&temp<='9') || temp == '_' || temp == '-'||
+			temp=='\b'|| temp=='\r')
 		{
 			return temp;
 		}
@@ -195,17 +252,20 @@ char onlyLetterInput()
 string oneWordInput(char(*inputCondition)())
 {
 	string temp;
-	while (true)
+	char symb;
+	do
 	{
-		char symb = inputCondition();
-		if (symb == '\r')
+		symb = inputCondition();
+		if (symb == '\b'&& temp.size() != 0) //removes * from the screen if backspace key's pressed
 		{
-			return temp;
+			temp.erase(temp.end() - 1);
+			cout << symb << " " << symb;
 		}
-		if (symb != ' ')
+		else if (symb != '\r'&& symb != ' ') // if enter key isn't pressed writes symbol down in input_password
 		{
 			cout << symb;
 			temp.push_back(symb);
 		}
-	}
+	} while (symb != '\r'); cout << endl; //when enter key's pressed finishes input process
+	return temp;
 }

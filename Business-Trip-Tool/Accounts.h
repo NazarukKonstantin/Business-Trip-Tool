@@ -71,13 +71,11 @@ const int ACCESS_LENGTH_LIMIT = 22;			// max (title of) access level length to f
 const int COUNTER_LENGTH_LIMIT = 5;			// max index length to fit in the output table 
 
 //---------Program starting functions---------------------------------------------------
-void showOptionsOnEnter(vector<Account>acc, Account& guest);							// shows sign-in/ log-in options
-void proceedPickedOption(vector<Account>acc, Account& guest);							// takes user's choice (sign-in or log-in) and calls appropriate function
-void showOptionsOnEnter(vector<Account>acc, Account& guest, bool& exit_token);			// shows sign-in/ log-in options
-void proceedPickedOption(vector<Account>acc, Account& guest, bool& exit_token);			// takes user's choice (sign-in or log-in) and calls appropriate function
+void showOptionsOnEnter(vector<Account>acc, Account& guest);							// shows sign-in/ log-in options,takes user's choice (sign-in or log-in) and calls appropriate function
+void showOptionsOnEnter(vector<Account>acc, Account& guest, bool& exit_token);			// shows sign-in/ log-in options,takes user's choice (sign-in or log-in) and calls appropriate function
 void setDefaultAccount();																// creates defaulr account (Login: Admin; Password: Admin;) if none exists
 //---------Registration functions-----------------------------------------------------------
-void signUp(vector<Account>acc, void(*roleCase)(Account& new_acc), Account& guest);			// executes commands and calls functions connected to registration process
+void signUp(vector<Account>&acc, void(*roleCase)(Account& new_acc), Account& guest);			// executes commands and calls functions connected to registration process
 bool isLoginUnique (vector<Account>acc, string input_login);								// checks if login is unique
 bool isPasswordStrong(string input_password,int password_length);							// checks if password is safe 
 string generateSalt();																		// generates salt
