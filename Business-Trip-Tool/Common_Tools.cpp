@@ -1,9 +1,9 @@
 #include "Common_Tools.h"
 
-bool wantToGoBack(string message)
+bool wantToGoBack(string message,int yes)
 {
-	int choice = inputIntNumbers(message,1, 2);
-	if (choice == 1)
+	int choice = inputIntNumbers(message,1, 2, ERROR_NUM_RANGE_INPUT + "(1-2)\n");
+	if (choice == yes)
 	{
 		return true;
 	}
@@ -101,7 +101,7 @@ int inputIntNumbers(string message,int l_border, int r_border,string error_messa
 		}
 		else
 		{
-			cout << error_message;
+			cout << ERROR_NOT_NUM;
 			clearStream();
 		}
 	}
@@ -110,7 +110,7 @@ bool doesFitInRange(int temp, int l_border, int r_border)
 {
 	return ((temp >= l_border) && (temp <= r_border));
 }
-int inputIntNumbers(string message,int limit)
+int inputIntNumbers(string message,int limit,string error_message)
 {
 	int temp = 0;
 	while (true)
@@ -125,12 +125,12 @@ int inputIntNumbers(string message,int limit)
 			}
 			else
 			{
-				cout << ERROR_INPUT;
+				cout << error_message;
 			}
 		}
 		else
 		{
-			cout << ERROR_INPUT;
+			cout << ERROR_NOT_NUM;
 			clearStream();
 		}
 	}
@@ -147,39 +147,55 @@ double inputDouble(string message, int limit)
 {
 	string st;
 	char temp;
+	cout << message;
 	do
 	{
 		temp = _getch();
-		if (temp == '\b' && st.size() != 0) //removes * from the screen if backspace key's pressed
+		if (temp == '\b' && st.size() != 0) //removes symb from the screen if backspace key's pressed
 		{
 			st.erase(st.end() - 1);
 			cout << temp << " " << temp;
 		}
 		else if (temp != '\r' && temp != ' ') // if enter key isn't pressed writes symbol down in input_password
 		{
-			if (temp >= '0' && temp <= '9')
+			if (!st.size())
 			{
-				cout << temp;
-				st.push_back(temp);
-			}
-			else if ((temp=='.'||temp==',')&&stoi(st))
-			{ 
-				cout << temp;
-				st.push_back(temp);
-				for (int i = 0; i < 2; i++)
+				if (temp >= '1' && temp <= '9')
 				{
-					temp = _getch();
-					if (temp >= '0' && temp <= '9')
+					cout << temp;
+					st.push_back(temp);
+				}
+			}
+			else
+			{
+				if (temp >= '0' && temp <= '9')
+				{
+					cout << temp;
+					st.push_back(temp);
+				}
+				else if ((temp == ',') && stoi(st))
+				{
+					cout << temp;
+					st.push_back(temp);
+					while (temp != '\r')
 					{
-						cout << temp;
-						st.push_back(temp);
+						temp = _getch();
+						if (temp == '\b' && st.size() != 0) //removes symb from the screen if backspace key's pressed
+						{
+							st.erase(st.end() - 1);
+							cout << temp << " " << temp;
+						}
+						if (temp >= '0' && temp <= '9')
+						{
+							cout << temp;
+							st.push_back(temp);
+						}
 					}
 				}
-				getchar();
-				temp = '\r';
 			}
 		}
-	} while (temp != '\r'); cout << endl; //when enter key's pressed finishes input process
+	} while (temp != '\r'||!st.size()); cout << endl; //when enter key's pressed finishes input process
+	if (st[st.size() - 1] == '.' || st[st.size() - 1] == ',') st.push_back('0');
 	return stod(st);
 }
 
@@ -226,23 +242,36 @@ char onlyLetterInput()
 	while (true)
 	{
 		char temp = _getch();
-		if ((temp >= 'A' && temp <= 'Z') || (temp >= 'a' && temp <= 'z') ||
-			(temp >= 'À' && temp <= 'ß') || (temp >= 'à' && temp <= 'ÿ')||
+		if ((temp >= 'À' && temp <= 'ß') || (temp >= 'à' && temp <= 'ÿ')||
 			temp=='_'||temp=='-' || temp == '\b' || temp == '\r')
 		{
 			return temp;
 		}
 	}
 }
-char numberOrLetterInput()
+char currencyInput()
 {
 	while (true)
 	{
 		char temp = _getch();
-		if ((temp >= 'A' && temp <= 'Z') || (temp >= 'a' && temp <= 'z') ||
-			(temp >= 'À' && temp <= 'ß') || (temp >= 'à' && temp <= 'ÿ') ||
-			(temp>='0'&&temp<='9') || temp == '_' || temp == '-'||
-			temp=='\b'|| temp=='\r')
+		if ((temp >= 'A' && temp <= 'Z') ||
+			temp == '_' || temp == '-' || temp == '\b' || temp == '\r')
+		{
+			return temp;
+		}
+		if (temp >= 'a' && temp <= 'z')
+		{
+			return toupper(temp);
+		}
+	}
+}
+char onlyNumInput()
+{
+	while (true)
+	{
+		char temp = _getch();
+		if ((temp >= '0' && temp <= '9') ||
+			temp == ',' || temp == '\b' || temp == '\r')
 		{
 			return temp;
 		}
@@ -266,6 +295,6 @@ string oneWordInput(char(*inputCondition)())
 			cout << symb;
 			temp.push_back(symb);
 		}
-	} while (symb != '\r'); cout << endl; //when enter key's pressed finishes input process
+	} while (symb != '\r'||!temp.size()); cout << endl; //when enter key's pressed finishes input process
 	return temp;
 }

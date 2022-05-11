@@ -40,7 +40,7 @@ void enterEmployees(vector <Trip_Man>& emp)
 		{
 			choice.at(curr_char) = tolower(choice.at(curr_char));
 		}
-		if (choice == "1" || choice == "да" || choice == "yes")
+		if (choice == "1" || choice == "да")
 		{
 			writeTripFile(emp);
 			break;
@@ -50,41 +50,86 @@ void enterEmployees(vector <Trip_Man>& emp)
 void enter1Employee(Trip_Man& temp)
 {
 	clearScreen();
+	showOneEmployee();
 	inputSurname(temp);
+	clearScreen();
+	showOneEmployee(temp.surname);
 	inputName(temp);
+	clearScreen();
+	showOneEmployee(temp.surname,temp.name);
 	inputPatronymic(temp);
+	clearScreen();
+	showOneEmployee(temp.surname,temp.name,temp.patronymic);
 	inputYear(temp);
+	clearScreen();
+	showOneEmployee(temp.surname,temp.name,temp.patronymic,to_string(temp.year));
 	inputMonth(temp);
+	clearScreen();
+	showOneEmployee(temp.surname, temp.name, temp.patronymic, to_string(temp.year),temp.month);
 	inputDays(temp);
+	clearScreen();
+	showOneEmployee(temp.surname, temp.name, temp.patronymic, to_string(temp.year), temp.month,to_string(temp.trip_length));
 	inputMoney(temp);
+	clearScreen();
+	showOneEmployee(temp.surname, temp.name, temp.patronymic, to_string(temp.year), temp.month, to_string(temp.trip_length),doubleToString(temp.money_per_day));
 	inputCurrency(temp);
+	clearScreen();
+	showOneEmployee(temp.surname, temp.name, temp.patronymic, to_string(temp.year), temp.month, to_string(temp.trip_length), doubleToString(temp.money_per_day),temp.currency);
 	inputTown(temp);
+	clearScreen();
+	showOneEmployee(temp.surname, temp.name, temp.patronymic, to_string(temp.year), temp.month, to_string(temp.trip_length), doubleToString(temp.money_per_day), temp.currency,temp.town);
+}
+void showOneEmployee (string surname,string name,string patronymic,string year, string month, string days, string money, string currency,string town)
+{
+	string emp_divider(TABLE_TRIP_HEADER.size()+1, '-');
+	string blank_year(YEAR_LINE_LIMIT, ' '), blank_month(MONTH_LINE_LIMIT, ' '), blank_days(DAYS_LINE_LIMIT, ' '), blank_money(MONEY_LINE_LIMIT_2, ' '), blank_town(TOWN_LINE_LIMIT, ' ');
+
+	cout << "|" << setw(F_I_O_LINE_LIMIT) << surname
+		<< "|" << setw(YEAR_LINE_LIMIT) << year
+		<< "|" << setw(MONTH_LINE_LIMIT) << month
+		<< "|" << setw(DAYS_LINE_LIMIT) << days
+		<< "|" << setw(MONEY_LINE_LIMIT_2) << money + " " + currency
+		<< "|" << setw(TOWN_LINE_LIMIT) << town << "|" << endl
+		<< "|" << setw(F_I_O_LINE_LIMIT) << name
+		<< "|" << blank_year << "|" << blank_month << "|" << blank_days << "|" << blank_money<< "|" << blank_town << "|" << endl;
+	/*	<< "|" << setw(YEAR_LINE_LIMIT) << "|" << setw(MONTH_LINE_LIMIT) << "|" << setw(DAYS_LINE_LIMIT) << "|" << setw(MONEY_LINE_LIMIT) << "|" << setw(TOWN_LINE_LIMIT) << "|" << endl;*/
+
+	if (patronymic != "-") //printing patronymic if such exists
+	{
+		/*string patronymic_temp_length(F_I_O_LINE_LIMIT - emp[curr_emp].patronymic.size(), ' ');*/
+		cout << "|" << setw(F_I_O_LINE_LIMIT) << patronymic
+			<< "|" << blank_year << "|" << blank_month << "|" << blank_days << "|" << blank_money << "|" << blank_town << "|" << endl;
+			/*<< "|" << setw(YEAR_LINE_LIMIT) << "|" << setw(MONTH_LINE_LIMIT) << "|" << setw(DAYS_LINE_LIMIT) << "|" << setw(MONEY_LINE_LIMIT) << "|" << setw(TOWN_LINE_LIMIT) << "|" << endl;*/
+	}
+	cout << "|" << emp_divider << "|\n";
 }
 
-void processTripFile(vector<Account>& acc, Account& guest,vector <Trip_Man>& emp,bool is_file_open,bool& exit_token)
+void processTripFile(vector<Account>& acc, Account& guest,vector <Trip_Man>& emp,bool is_file_open,bool& exit_token,string file_name)
 {
-	readTripFile(emp, is_file_open);
-	while (!is_file_open)
+	readTripFile(emp, is_file_open,file_name);
+	while (!is_file_open&&!exit_token)
 	{
 		clearScreen();
-		int choice = inputIntNumbers(NO_FILE_ACCESS,0,2);
+		int choice = inputIntNumbers(NO_FILE_ACCESS,0,3, ERROR_NUM_RANGE_INPUT + "(0-3)\n");
 		switch (choice)
 		{
-		case 0: exit_token = true; is_file_open = true; break;
+		case 0: exit_token = true; break;
 		case 1: enterEmployees(emp); break;
-		case 2: processAccountMenu(acc,guest); break;
+		case 2: processTripFile(acc,guest,emp,is_file_open,exit_token,TEST_FILE); break;
+		case 3: processAccountMenu(acc, guest, exit_token); break;
 		}
-		readTripFile(emp, is_file_open);
+		readTripFile(emp, is_file_open,file_name);
 	}
 }
 
-void readTripFile(vector <Trip_Man>& emp, bool& is_file_open)
+void readTripFile(vector <Trip_Man>& emp, bool& is_file_open,string file_name)
 {
-	int amount_of_employees = countStructuresInTripFile(is_file_open);
+	int amount_of_employees = countStructuresInTripFile(is_file_open,file_name);
 	if (is_file_open)
 	{
+		if (emp.size()) emp.clear();
 		emp.reserve(amount_of_employees);						
-		ifstream f_in(TRIP_INFO, ios::in);
+		ifstream f_in(file_name, ios::in);
 		while (!f_in.eof())
 		{
 			Trip_Man temp;
@@ -96,9 +141,9 @@ void readTripFile(vector <Trip_Man>& emp, bool& is_file_open)
 		f_in.close();
 	}
 }
-int countStructuresInTripFile(bool& is_file_open)
+int countStructuresInTripFile(bool& is_file_open, string file_name)
 {
-	ifstream fin(TRIP_INFO, ios::in);
+	ifstream fin(file_name, ios::in);
 	int amount_of_employees = 0;
 	if (fin.is_open())
 	{
@@ -118,22 +163,7 @@ int countStructuresInTripFile(bool& is_file_open)
 	fin.close();
 	return amount_of_employees;
 }
-void writeEndTripFile(Trip_Man new_emp)
-{
-	ofstream f_add(ACCOUNT_FILE_NAME, ios::app);
-	f_add << endl;
-	f_add << new_emp.surname << " "
-		<< new_emp.name << " "
-		<< new_emp.patronymic << " "
-		<< new_emp.year << " "
-		<< new_emp.month<< " "
-		<< new_emp.month_num<<" "
-		<< new_emp.trip_length<<" "
-		<< new_emp.money_per_day<<" "
-		<< new_emp.currency<<" "
-		<< new_emp.town;
-	f_add.close();
-}
+
 void writeTripFile(vector<Trip_Man> emp)
 {
 	int vec_size = emp.size();
@@ -158,73 +188,65 @@ void writeTripFile(vector<Trip_Man> emp)
 	fout.close();
 }
 
-void processMainMenu(vector <Trip_Man>& emp, vector<Account>& acc, Account& guest)
+void processMainMenu(vector <Trip_Man>& emp, vector<Account>& acc, Account& guest, bool& exit_token)
 {
 	do
 	{
 		clearScreen();
-		int main_menu_choice = inputIntNumbers(MAIN_MENU,0, 2);
+		int main_menu_choice = inputIntNumbers(MAIN_MENU,0, 2, ERROR_NUM_RANGE_INPUT + "(0-2)\n");
 		switch (main_menu_choice)
 		{
-		case 1: processAccountMenu(acc, guest); break;
+		case 1: processAccountMenu(acc, guest,exit_token); break;
 		case 2: processTripMenu(emp, guest); break;
 		case 0: return;
 		}
-		clearScreen();
-		cout << MAIN_MENU;
 	} while (true);
 }
-void processAccountMenu(vector<Account>& acc, Account& guest)
+void processAccountMenu(vector<Account>& acc, Account& guest,bool&exit_token)
 {
 	do
 	{
 		clearScreen();
 		int choice = 0;
-		(guest.role == 1) ? choice=inputIntNumbers(ACCOUNT_MENU_ROLE_1,0, 5) : choice = inputIntNumbers(ACCOUNT_MENU_ROLE_0, 0, 5);
+		(guest.role == 1) ? choice=inputIntNumbers(ACCOUNT_MENU_ROLE_1,0, 5, ERROR_NUM_RANGE_INPUT + "(0-5)\n") : choice = inputIntNumbers(ACCOUNT_MENU_ROLE_0, 0, 5, ERROR_NUM_RANGE_INPUT + "(0-5)\n");
 		if (guest.role == 1) //admin only options
 		{
 			switch (choice)
 			{
-			case 2: showAccountArray(acc); break;
+			case 2: showAccountArray(acc); _getch(); break;
 			case 3: addAccountInArray(acc, guest); break;
-			case 4: pickAccountInArray(TO_EDIT,CHOOSE_TO_EDIT,acc, editAccountMenu); break;
-			case 5: pickAccountInArray(TO_DELETE,CHOOSE_TO_DELETE,acc, deleteAccountInArray);break;
+			case 4: pickAccountInArray(TO_EDIT, CHOOSE_TO_EDIT, acc, editAccountMenu, YOU_SURE_TO_EDIT); _getch(); break;
+			case 5: pickAccountInArray(TO_DELETE, CHOOSE_TO_DELETE, acc, deleteAccountInArray, YOU_SURE_TO_DELETE); _getch(); break;
 			}
 		}
 		switch (choice) //any user options
 		{
-		case 1: changeLogin(acc, guest); clearScreen(); break;
+		case 1: changeLogin(acc, guest,exit_token); _getch(); break;
 		case 0: return;
 		}
-		system("pause");
-		clearScreen();
-		guest.role == 1 ? cout << ACCOUNT_MENU_ROLE_1 : cout << ACCOUNT_MENU_ROLE_0;
 	} while (true);
 }
-void processTripMenu(vector<Trip_Man> emp, Account guest)
+void processTripMenu(vector<Trip_Man>& emp, Account guest)
 {
 	do
 	{
 		int useless_counter = 0;
 		clearScreen();
 		int choice = 0;
-		(guest.role == 1) ? choice = inputIntNumbers(TRIP_MENU_ROLE_1,0, 6): choice = inputIntNumbers(TRIP_MENU_ROLE_0, 0, 6);
+		(guest.role == 1) ? choice = inputIntNumbers(TRIP_MENU_ROLE_1,0, 6, ERROR_NUM_RANGE_INPUT + "(0-6)\n"): choice = inputIntNumbers(TRIP_MENU_ROLE_0, 0, 6, ERROR_NUM_RANGE_INPUT + "(0-6)\n");
 		if (guest.role == 1 && choice == 6) //admin only option
 		{
 			processDataChangeMenu(emp);
 		}
 		switch (choice) //any user options
 		{
-		case 1: showTripArray(emp); break;
-		case 2: countMoney4MonthX(emp);break;
-		case 3: sortTowns(emp);break;
+		case 1: showTripArray(emp); _getch(); break;
+		case 2: countMoney4MonthX(emp); _getch(); break;
+		case 3: sortTowns(emp); _getch(); break;
 		case 4: searchMenu(emp, useless_counter); break;
 		case 5: sortMenu(emp); break;
 		case 0: return;
 		}
-		system("pause");
-		clearScreen();
-		guest.role == 1 ? cout << TRIP_MENU_ROLE_1 : cout << TRIP_MENU_ROLE_0;
 	} while (true);
 }
 void processDataChangeMenu(vector<Trip_Man>& emp)
@@ -232,19 +254,14 @@ void processDataChangeMenu(vector<Trip_Man>& emp)
 	do
 	{
 		clearScreen();
-		showTripArray(emp);
-		int choice = inputIntNumbers(DATA_CHANGE_MENU_ROLE_1,0,3);
+		int choice = inputIntNumbers(DATA_CHANGE_MENU_ROLE_1,0,3, ERROR_NUM_RANGE_INPUT + "(0-3)\n");
 		switch (choice)
 		{
-		case 1: addData(emp); break;
-		case 2: pickDataInArray(CHOOSE_TO_EDIT,emp,editDataMenu); break;
-		case 3: pickDataInArray(CHOOSE_TO_DELETE,emp,deleteData); break;
+		case 1: enterEmployees(emp); break;
+		case 2: pickDataInArray(CHOOSE_TO_EDIT, emp, editDataMenu); _getch(); break;
+		case 3: pickDataInArray(CHOOSE_TO_DELETE, emp, deleteData); _getch(); break;
 		case 0: return;
 		}
-		system("pause");
-		clearScreen();
-		showTripArray(emp);
-		cout << DATA_CHANGE_MENU_ROLE_1;
 	} while (true);
 }
 
@@ -261,32 +278,22 @@ void showTripArray(vector<Trip_Man>emp, int c_length)
 }
 void showOneEmployee(vector<Trip_Man>emp, int curr_emp,int c_length)
 {
-	// strings filled with spaces to format the output
-	string counter_length(c_length, ' ');
 	string counter_length_div(c_length, '-');
 	string blank_year(YEAR_LINE_LIMIT, ' '), blank_month(MONTH_LINE_LIMIT, ' '), blank_days(DAYS_LINE_LIMIT, ' '), blank_money(MONEY_LINE_LIMIT, ' '), blank_town(TOWN_LINE_LIMIT, ' ');
 	string emp_divider(TABLE_TRIP_HEADER.size() - 3, '-');
-	string surname_temp_length(F_I_O_LINE_LIMIT - (emp[curr_emp].surname).size(), ' ');
-	string name_temp_length(F_I_O_LINE_LIMIT - (emp[curr_emp].name).size(), ' ');
-	string year_temp_length(YEAR_LINE_LIMIT - to_string(emp[curr_emp].year).size(), ' ');
-	string month_temp_length(MONTH_LINE_LIMIT - (emp[curr_emp].month).size(), ' ');
-	string days_temp_length(DAYS_LINE_LIMIT - to_string(emp[curr_emp].trip_length).size(), ' ');
-	string money_temp_length((MONEY_LINE_LIMIT - (doubleToString(emp[curr_emp].money_per_day).size() + (emp[curr_emp].currency).size()+1)), ' ');
-	string town_temp_length(TOWN_LINE_LIMIT - (emp[curr_emp].town).size(), ' ');
 
-	cout<< "|" << emp[curr_emp].surname << surname_temp_length
-		<< "|" << emp[curr_emp].year << year_temp_length
-		<< "|" << emp[curr_emp].month << month_temp_length
-		<< "|" << emp[curr_emp].trip_length << days_temp_length
-		<< "|" << doubleToString(emp[curr_emp].money_per_day) <<" "<< emp[curr_emp].currency << money_temp_length
-		<< "|" << emp[curr_emp].town << town_temp_length << "|" << endl
-		<<counter_length<< "|" << emp[curr_emp].name << name_temp_length
+	cout<< "|" << setw(F_I_O_LINE_LIMIT)<< emp[curr_emp].surname
+		<< "|" << setw(YEAR_LINE_LIMIT) <<emp[curr_emp].year
+		<< "|" << setw(MONTH_LINE_LIMIT)<< emp[curr_emp].month
+		<< "|" << setw(DAYS_LINE_LIMIT) << emp[curr_emp].trip_length
+		<< "|" << setw(MONEY_LINE_LIMIT)<< doubleToString(emp[curr_emp].money_per_day)+" "+emp[curr_emp].currency
+		<< "|" << setw(TOWN_LINE_LIMIT) << emp[curr_emp].town << "|" << endl
+		<<setw(c_length+1)<< "|" << setw(F_I_O_LINE_LIMIT) << emp[curr_emp].name
 		<< "|" << blank_year << "|" << blank_month << "|" << blank_days << "|" << blank_money << "|" << blank_town <<"|"<< endl;
 
 	if (emp[curr_emp].patronymic != "-") //printing patronymic if such exists
 	{
-		string patronymic_temp_length(F_I_O_LINE_LIMIT - emp[curr_emp].patronymic.size(), ' ');
-		cout <<counter_length<< "|" << emp[curr_emp].patronymic << patronymic_temp_length
+		cout <<setw(c_length+1) << "|" <<setw(F_I_O_LINE_LIMIT)<< emp[curr_emp].patronymic
 			<< "|" << blank_year << "|" << blank_month << "|" << blank_days << "|" << blank_money << "|" << blank_town <<"|"<< endl;
 	}
 	cout <<counter_length_div<< "|" << emp_divider << "|\n";
@@ -294,7 +301,6 @@ void showOneEmployee(vector<Trip_Man>emp, int curr_emp,int c_length)
 
 string doubleToString(double value)
 {
-	value = ceil(value * 100.0) / 100.0;
 	string result,temp= to_string(value);
 	int s_size=temp.size();
 	for (int curr_symb = 0; curr_symb < s_size-3; curr_symb++)
@@ -354,7 +360,7 @@ string countMoney(vector<Month_Money> value)
 					value[next_mon].unique = false; //turning uniqueness of such unit to false
 				}
 			}
-			result += to_string(currency_sum) + value[curr_mon].currency + ", "; //result string: "value_1_sum CURRENCY_1, value_2_sum CURRENCY_2..." 
+			result += doubleToString(currency_sum) +" "+ value[curr_mon].currency + ", "; //result string: "value_1_sum CURRENCY_1, value_2_sum CURRENCY_2..." 
 		}
 	}
 	if (value[value_size - 1].unique == true) //if the last unit's currency is unique
@@ -372,9 +378,9 @@ void sortTowns(vector<Trip_Man> emp)
 	int year_x=0, year_y=0;
 	int X = 0, Y = 0;
 	X = enterMonth(emp,ENTER_MONTH_X, month_x);
-	year_x = inputIntNumbers(ENTER_YEAR,YEAR_LINE_LIMIT);
+	year_x = inputIntNumbers(ENTER_YEAR,YEAR_INPUT_LIM,ERROR_LIMIT_INPUT_P1+to_string(YEAR_INPUT_LIM)+ERROR_LIMIT_INPUT_P2);
 	Y = enterMonth(emp,ENTER_MONTH_Y, month_y);
-	year_y = inputIntNumbers(ENTER_YEAR,YEAR_LINE_LIMIT);
+	year_y = inputIntNumbers(ENTER_YEAR,YEAR_INPUT_LIM, ERROR_LIMIT_INPUT_P1 + to_string(YEAR_INPUT_LIM) + ERROR_LIMIT_INPUT_P2);
 	if (year_x > year_y) swap(year_x, year_y); // if user firstly entered bigger year, swaps them
 	vector<Town_Frequency> town_set, picked_towns;
 	fillTowns2SortArray(town_set, emp, year_x, year_y, X, Y); //writing town_set array
@@ -389,56 +395,30 @@ int enterMonth(vector<Trip_Man> emp,string message, string& month)
 	{
 		clearScreen();
 		showTripArray(emp);
-		cout << message;
-		(cin >> month).get();
-		int str_size = month.size();
-		int counter = 0;
-		for (int curr_symb = 0; curr_symb < str_size; curr_symb++)
-		{
-			if (isdigit(month[curr_symb]))
-			{
-				counter++;
-			}
-		}
-		if (counter == str_size)
-		{
-			return stoi(month);
-		}
-		else if (!counter) //if counter remained 0, which means there're no numbers in month name
-		{
-			int temp = convertMonthName2Number(month, str_size);
-			if (!temp)
-			{
-				continue;
-			}
-			return temp;
-		}
-		else //if month name is not only numbers or letters
-		{
-			cout << WRONG_MONTH;
-		}
+		int month_num = inputIntNumbers(message,1,MONTH_SET.size(),ERROR_NUM_RANGE_INPUT+"(1-"+to_string(MONTH_SET.size())+")\n");
+		month = MONTH_SET.at(month_num-1);
 	}
 }
-int convertMonthName2Number(string& month, int str_size)
-{
-	while (true)
-	{
-		switch (month[0])
-		{
-		case 'S': case 'С': return 9;
-		case 'O': case 'О': return 10;
-		case 'N': case 'Н': return 11;
-		case 'D': case 'Д': return 12;
-		case 'F': case 'Ф': return 2;
-		case 'M': case 'М': switch (month[2]) { case 'r': case'p': return 3; case'у': case'й': return 5; }
-		case 'A': case 'А': switch (month[1]) { case 'p': case'п': return 4; case'u': case'в': return 8; }
-		case 'J': switch (month[3]) { case 'u': return 1; case 'e': return 6; case'y': return 7; }
-		case 'Я': return 1;
-		case 'И': switch (month[2]) { case'н': return 6; case'л':return 7; }
-		default: cout << WRONG_MONTH; return 0;
-		}
-	}
-}
+//int convertMonthName2Number(string& month, int str_size)
+//{
+//	while (true)
+//	{
+//		switch (month[0])
+//		{
+//		case 'S': case 'С': return 9;
+//		case 'O': case 'О': return 10;
+//		case 'N': case 'Н': return 11;
+//		case 'D': case 'Д': return 12;
+//		case 'F': case 'Ф': return 2;
+//		case 'M': case 'М': switch (month[2]) { case 'r': case'p': return 3; case'у': case'й': return 5; }
+//		case 'A': case 'А': switch (month[1]) { case 'p': case'п': return 4; case'u': case'в': return 8; }
+//		case 'J': switch (month[3]) { case 'u': return 1; case 'e': return 6; case'y': return 7; }
+//		case 'Я': return 1;
+//		case 'И': switch (month[2]) { case'н': return 6; case'л':return 7; }
+//		default: cout << WRONG_MONTH; return 0;
+//		}
+//	}
+//}
 void fillTowns2SortArray(vector<Town_Frequency>& town_set,vector<Trip_Man> emp, int year_x, int year_y, int X, int Y)
 {
 	Town_Frequency temp;
@@ -537,44 +517,39 @@ void showSortedTowns(vector<Town_Frequency> picked_towns, int X, int Y, int year
 	}
 }
 
-void searchMenu(vector<Trip_Man> emp, int& counter)
+void searchMenu(vector<Trip_Man>&emp, int& counter)
 {
 	do
 	{
 		clearScreen();
-		showTripArray(emp);
-		int choice = inputIntNumbers(SEARCH_MENU,0,10);
+		int choice = inputIntNumbers(SEARCH_MENU,0,10, ERROR_NUM_RANGE_INPUT + "(0-10)\n");
 		switch (choice)
 		{
-	/*	case 1: searchData(ENTER_SURNAME,emp,counter,searchBySurname); break;
-		case 2: searchData(ENTER_NAME,emp,counter,searchByName); break;
-		case 3: searchData(ENTER_PATRONYMIC,emp,counter,searchByPatronymic); break;
-		case 4: searchData(ENTER_TOWN,emp,counter,searchByTown); break;
-		case 5: searchData(ENTER_MONTH,emp,counter,searchByMonth); break;*/
 		case 1: searchData(ENTER_SURNAME, emp,&Trip_Man::surname,counter); break;
 		case 2: searchData(ENTER_NAME, emp,&Trip_Man::name, counter); break;
-		case 3: searchData(ENTER_PATRONYMIC, emp,&Trip_Man::patronymic, counter); break;
-		case 4: searchData(ENTER_TOWN, emp,&Trip_Man::town, counter); break;
+		case 3: searchData(ENTER_PATRONYMIC, emp, &Trip_Man::patronymic, counter); break;
+		case 4: searchData(ENTER_TOWN, emp, &Trip_Man::town, counter); break;
 		case 5: searchData(ENTER_MONTH, emp,&Trip_Man::month, counter); break;
-		case 6: searchData(ENTER_MONTH, emp, &Trip_Man::month_num, counter); break;
-		case 7: searchData(ENTER_YEAR, emp, &Trip_Man::year, counter); break;
-		case 8: searchData(ENTER_MONEY, emp, &Trip_Man::money_per_day, counter); break;
-		case 9: searchData(ENTER_CURRENCY, emp, &Trip_Man::currency, counter); break;
-		case 10: searchData(ENTER_DAYS, emp, &Trip_Man::trip_length, counter); break;
+		case 6: searchData(ENTER_MONTH, emp, &Trip_Man::month_num, counter,onlyNumInput); break;
+		case 7: searchData(ENTER_YEAR, emp, &Trip_Man::year, counter,onlyNumInput); break;
+		case 8: searchData(ENTER_MONEY, emp, &Trip_Man::money_per_day, counter,onlyNumInput); break;
+		case 9: searchData(ENTER_CURRENCY, emp, &Trip_Man::currency, counter,currencyInput); break;
+		case 10: searchData(ENTER_DAYS, emp, &Trip_Man::trip_length, counter,onlyNumInput); break;
 		case 0: return;
 		}
-	} while (!wantToGoBack());
+	} while (!wantToGoBack(FINISHED_SEARCHING,2));
 }
 
 template<typename T>
-void searchData(string message, vector<Trip_Man>& emp,T Trip_Man::*field,int& counter)
+void searchData(string message, vector<Trip_Man>& emp,T Trip_Man::*field,int& counter, char(*inputCondition)())
 {
 	clearScreen();
-	showTripArray(emp);
 	cout << message;
-	string search_input = oneWordInput(numberOrLetterInput);
+	string search_input = oneWordInput(inputCondition);
+	if (inputCondition == onlyLetterInput) formatString(search_input);
 	int emp_size = emp.size();
 	int search_size = 0;
+	counter = 0;
 	clearScreen();
 	cout << "--№--"<<TABLE_TRIP_HEADER;
 	for (int curr_emp = 0; curr_emp < emp_size; curr_emp++)
@@ -588,8 +563,9 @@ void searchData(string message, vector<Trip_Man>& emp,T Trip_Man::*field,int& co
 				break;
 			}
 			string counter_length(COUNTER_LENGTH_LIMIT - to_string(emp[curr_emp].search_counter).size(), ' ');
-			cout << counter_length << emp[curr_emp].search_counter++;
 			counter++;
+			emp[curr_emp].search_counter = counter;
+			cout << counter_length << emp[curr_emp].search_counter;
 			showOneEmployee(emp, curr_emp,COUNTER_LENGTH_LIMIT);
 			break;
 		}
@@ -640,7 +616,7 @@ void sortMenu(vector<Trip_Man> emp)
 	{
 		clearScreen();
 		showTripArray(emp);
-		int choice = inputIntNumbers(SORT_MENU,0, 9);
+		int choice = inputIntNumbers(SORT_MENU,0, 9,ERROR_NUM_RANGE_INPUT + "(0-9)\n");
 		switch (choice)
 		{
 		case 1: sortData(SB_SURNAME, emp, &Trip_Man::surname); break;
@@ -660,7 +636,7 @@ void sortMenu(vector<Trip_Man> emp)
 template <typename T>
 void sortData(string message, vector<Trip_Man>emp, T Trip_Man::* temp)
 {
-	int choice = inputIntNumbers(SORT_DIRECTION,1, 2);
+	int choice = inputIntNumbers(SORT_DIRECTION,1, 2,ERROR_NUM_RANGE_INPUT + "(1-2)\n");
 	cout << SORTED_BY << message;
 	mySort(emp, temp, choice);
 	showTripArray(emp);
@@ -675,52 +651,12 @@ void mySort(vector<J>&vec, T J::*temp, int direction)
 		}
 	);
 }
-//bool sortBySurname(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice == 1) ? first.surname < second.surname : first.surname > second.surname;
-//}
-//bool sortByName(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice==1) ? first.name < second.name: first.name > second.name;
-//}
-//bool sortByPatronymic(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice == 1) ? first.patronymic < second.patronymic : first.patronymic > second.patronymic;
-//}
-//bool sortByDays(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice == 1) ? first.trip_length < second.trip_length : first.trip_length > second.trip_length;
-//}
-//bool sortByMoney(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice == 1) ? first.money_per_day < second.money_per_day : first.money_per_day > second.money_per_day;
-//}
-//bool sortByMonth(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice == 1) ? first.month_num < second.month_num : first.month_num > second.month_num;
-//}
-//bool sortByCurrency(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice == 1) ? first.currency < second.currency : first.currency > second.currency;
-//}
-//bool sortByTown(Trip_Man first, Trip_Man second, int choice)
-//{
-//	return (choice == 1) ? first.town < second.town : first.town > second.town;
-//}
-
-void addData(vector<Trip_Man>&emp)
-{
-	enterEmployees(emp);
-	writeTripFile(emp);
-}
-
 void pickDataInArray(string message, vector<Trip_Man>& emp, void (*changeData)(vector<Trip_Man>& emp, int curr_emp))
 {
-	clearScreen();
-	showTripArray(emp);
-	int counter = 1; //counter
+	int counter = 0;
 	searchMenu(emp,counter);
-	int choice = inputIntNumbers(message,1, counter);
+	if (!counter) return;
+	int choice = inputIntNumbers(message,1, counter, ERROR_NUM_RANGE_INPUT + "(1-"+to_string(counter)+ ")\n");
 	int vec_size = emp.size();
 	for (int curr_emp = 0; curr_emp < vec_size; curr_emp++)
 	{
@@ -734,50 +670,42 @@ void pickDataInArray(string message, vector<Trip_Man>& emp, void (*changeData)(v
 
 void editDataMenu(vector<Trip_Man>& emp, int curr_emp)
 {
-	int sure = inputIntNumbers(YOU_SURE,1, 2);
+	int sure = inputIntNumbers(YOU_SURE_TO_EDIT,1, 2, ERROR_NUM_RANGE_INPUT + "(1-2)\n");
 	if (sure == 1)
 	{
-		clearScreen();
-		showTripArray(emp);
-		int choice = inputIntNumbers(EDIT_DATA_MENU,0, 10);
+		int choice = inputIntNumbers(EDIT_DATA_MENU,0, 10, ERROR_NUM_RANGE_INPUT + "(0-10)\n");
 		switch (choice)
 		{
-		case 1: editData(ENTER_SURNAME,emp,curr_emp,inputSurname); break;
-		case 2: editData(ENTER_NAME, emp, curr_emp,inputName); break;
-		case 3: editData(ENTER_PATRONYMIC, emp, curr_emp,inputPatronymic); break;
-		case 4: editData(ENTER_YEAR, emp, curr_emp,inputYear); break;
-		case 5: editData(ENTER_MONTH, emp, curr_emp,inputMonth); break;
-		case 6: editData(ENTER_DAYS, emp, curr_emp,inputDays); break;
-		case 7: editData(ENTER_MONEY, emp, curr_emp,inputMoney); break;
-		case 8: editData(ENTER_CURRENCY,emp,curr_emp,inputCurrency); break;
-		case 9: editData(ENTER_TOWN, emp, curr_emp,inputTown); break;
+		case 1: inputSurname(emp[curr_emp]); break;
+		case 2: inputName(emp[curr_emp]); break;
+		case 3: inputPatronymic(emp[curr_emp]); break;
+		case 4: inputYear(emp[curr_emp]); break;
+		case 5: inputMonth(emp[curr_emp]); break;
+		case 6: inputDays(emp[curr_emp]); break;
+		case 7: inputMoney(emp[curr_emp]); break;
+		case 8: inputCurrency(emp[curr_emp]); break;
+		case 9: inputTown(emp[curr_emp]); break;
 		case 10: enter1Employee(emp[curr_emp]); break;
 		case 0: return;
 		}
+		cout << SUCC_EDIT;
 	}
-}
-void editData(string message,vector<Trip_Man>& emp, int curr_emp,void(*inputNewData)(Trip_Man& temp))
-{
-	clearScreen();
-	showTripArray(emp);
-	cout << message;
-	inputNewData(emp[curr_emp]);
 }
 
 void formatString(string& temp)
 {
 	int str_size = temp.size();
-	temp[0] = toupper(temp[0]);
-	int curr_symb = 1;
+	int curr_symb = 0;
+	temp[curr_symb] = toupper(temp[curr_symb]);
 	while(curr_symb < str_size)
 	{
-		temp[curr_symb] = tolower(temp[curr_symb]);
 		if ((temp[curr_symb] == '-' || temp[curr_symb] == '_') && curr_symb < str_size - 1)
 		{
 			temp[curr_symb + 1] = toupper(temp[curr_symb + 1]);
 			curr_symb ++;
 		}
 		curr_symb++;
+		temp[curr_symb] = tolower(temp[curr_symb]);
 	}
 }
 
@@ -805,14 +733,14 @@ void inputPatronymic(Trip_Man& temp)
 		{
 			tempor.at(curr_char) = tolower(tempor.at(curr_char));
 		}
-		if (tempor == "no" || temp.patronymic == "нет") //no means employee got no patronymic
+		if (temp.patronymic == "нет") //no means employee got no patronymic
 		{
 			temp.patronymic = "-";
 			break;
 		}
 		else
 		{
-			int sure = inputIntNumbers(YOU_SURE,1, 2);
+			int sure = inputIntNumbers(YOU_SURE,1, 2, ERROR_NUM_RANGE_INPUT + "(1-2)\n");
 			if (sure == 2)
 			{
 				temp.patronymic = check4TooBigString(F_I_O_LINE_LIMIT, onlyLetterInput,ENTER_PATRONYMIC);
@@ -826,33 +754,17 @@ void inputPatronymic(Trip_Man& temp)
 }
 void inputYear(Trip_Man& temp)
 {
-	temp.year = inputIntNumbers(ENTER_YEAR,YEAR_LINE_LIMIT);
+	temp.year = inputIntNumbers(ENTER_YEAR,YEAR_INPUT_LIM, ERROR_LIMIT_INPUT_P1 + to_string(YEAR_INPUT_LIM) + ERROR_LIMIT_INPUT_P2);
 }
 void inputMonth(Trip_Man& temp)
 {
-	temp.month = check4TooBigString(MONTH_LINE_LIMIT,onlyLetterInput,ENTER_MONTH);
-	while (!isMonth(temp.month))
+	int month_size = MONTH_SET.size();
+	for (int curr_month = 0; curr_month < month_size; curr_month++)
 	{
-		temp.month = check4TooBigString(MONTH_LINE_LIMIT, onlyLetterInput, ENTER_MONTH);
+		cout << setw(5) << curr_month + 1 << ". " << MONTH_SET.at(curr_month) << endl;
 	}
-	if (temp.month == NO_INFO) return;
-	formatString(temp.month);
-	int month_size = temp.month.size();
-	temp.month_num = convertMonthName2Number(temp.month, month_size);
-}
-bool isMonth(string input_month)
-{
-	formatString(input_month);
-	int month_set_size = MONTH_SET.size();
-	for (int i = 0; i < month_set_size; i++)
-	{
-		if (input_month == MONTH_SET.at(i))
-		{
-			return true;
-		}
-	}
-	cout << WRONG_MONTH;
-	return false;
+	temp.month_num = inputIntNumbers(ENTER_MONTH,1,month_size, ERROR_NUM_RANGE_INPUT + "(1-"+to_string(month_size)+")\n");
+	temp.month = MONTH_SET.at(temp.month_num - 1);
 }
 void inputDays(Trip_Man& temp)
 {
@@ -865,18 +777,12 @@ void inputDays(Trip_Man& temp)
 }
 void inputMoney(Trip_Man& temp)
 {
-	temp.money_per_day = inputDouble(ENTER_MONEY,MONEY_LINE_LIMIT);
-	temp.money_per_day = ceil(temp.money_per_day * 100.0) / 100.0;
+	temp.money_per_day = ceil(inputDouble(ENTER_MONEY, MONEY_LINE_LIMIT) * 100.0) / 100.0;
 }
 void inputCurrency(Trip_Man& temp)
 {
-	string curr = check4TooBigString(CURRENCY_LIMIT,onlyLetterInput,ENTER_CURRENCY);
-	if (curr == NO_INFO) return;
-	int curr_size = curr.size();
-	for (int i = 0; i < curr_size; i++)
-	{
-		temp.currency.push_back(toupper(curr.at(i)));
-	}
+	if (temp.currency.size()) temp.currency.clear();
+	temp.currency = check4TooBigString(CURRENCY_LIMIT,currencyInput,ENTER_CURRENCY);
 }
 void inputTown(Trip_Man& temp)
 {
@@ -887,12 +793,11 @@ void inputTown(Trip_Man& temp)
 
 void deleteData(vector<Trip_Man>& emp, int curr_emp)
 {
-	clearScreen();
-	showTripArray(emp);
-	int sure = inputIntNumbers(YOU_SURE,1,2);
+	int sure = inputIntNumbers(YOU_SURE_TO_DELETE,1,2, ERROR_NUM_RANGE_INPUT + "(1-2)\n");
 	if (sure == 1)
 	{
 		emp.erase(emp.begin() + curr_emp);
+		cout << SUCC_DELETE;
 	}
 	writeTripFile(emp);
 }

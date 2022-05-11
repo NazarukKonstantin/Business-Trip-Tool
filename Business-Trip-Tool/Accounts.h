@@ -8,6 +8,7 @@
 #include <conio.h>
 #include <ctime>
 #include "sha256.h"
+#include <iomanip>
 #include "Common_Tools.h"
 
 using namespace std;
@@ -51,8 +52,8 @@ const string TABLE_ACCOUNTS_HEADER = "|-------|ЛОГИН|-------|-------|РОЛЬ|------
 const string ROLE = "Установите роль этого аккаунта:\n 1.Администратор\n 2.Пользователь\n";
 const string ACCESS = "Разрешить доступ данного аккаунта к системе?\n 1.Да\n 2.Нет\n";
 
-const string EDIT_ACCOUNT_MENU = "Что вы хотите отредактировать?\n 1. Логин\n 2.Роль(Админ/Пользователь)\n\
- 3.Доступ к системе(Разрешён/Запрещён)\n 0.Выход\n";
+const string LOGIN_CONFIRM = "Пожалуйста, подтвердите свой текущий логин\n";
+const string EDIT_ACCOUNT_MENU = "Что вы хотите отредактировать?\n 1.Роль(Админ/Пользователь)\n 2.Доступ к системе(Разрешён/Запрещён)\n 0.Выход\n";
 const string TO_EDIT = "Введите логин аккаунта, который хотите отредактировать: ";
 const string TO_DELETE = "Введите логин аккаунта, который хотите удалить: ";
 const string DONT_DELETE_YOURSELF = "Извините, но вы не можете удалить свой аккаунт";
@@ -71,11 +72,10 @@ const int ACCESS_LENGTH_LIMIT = 22;			// max (title of) access level length to f
 const int COUNTER_LENGTH_LIMIT = 5;			// max index length to fit in the output table 
 
 //---------Program starting functions---------------------------------------------------
-void showOptionsOnEnter(vector<Account>acc, Account& guest);							// shows sign-in/ log-in options,takes user's choice (sign-in or log-in) and calls appropriate function
-void showOptionsOnEnter(vector<Account>acc, Account& guest, bool& exit_token);			// shows sign-in/ log-in options,takes user's choice (sign-in or log-in) and calls appropriate function
+void showOptionsOnEnter(vector<Account>&acc, Account& guest, bool& exit_token);			// shows sign-in/ log-in options,takes user's choice (sign-in or log-in) and calls appropriate function
 void setDefaultAccount();																// creates defaulr account (Login: Admin; Password: Admin;) if none exists
 //---------Registration functions-----------------------------------------------------------
-void signUp(vector<Account>&acc, void(*roleCase)(Account& new_acc), Account& guest);			// executes commands and calls functions connected to registration process
+void signUp(vector<Account>&acc, void(*roleCase)(Account& new_acc), Account& guest);		// executes commands and calls functions connected to registration process
 bool isLoginUnique (vector<Account>acc, string input_login);								// checks if login is unique
 bool isPasswordStrong(string input_password,int password_length);							// checks if password is safe 
 string generateSalt();																		// generates salt
@@ -84,7 +84,8 @@ string makePasswordHashedAndSalty(string input_password, string salt);						// h
 string showOrHidePassword();																// password input function (hide or show password while entering)
 void request4confirmation(string& input_password, bool& flag, int password_length);			// reguests 4 user to change a weak password
 //---------Log-in functions---------------------------------------------------------
-void logIn(vector<Account>acc, Account& guest);										// executes commands and calls functions connected to log-in process
+void logIn(vector<Account>&acc, Account& guest, bool& exit_token);									// executes commands and calls functions connected to log-in process
+void changeAccActiceStatus(vector<Account>& acc, Account& guest,bool state);					// changes active status to the opposite
 bool isPasswordCorrect(vector<Account>acc, Account& guest, string input_password);	// checks if password mathes the one saved in the system
 bool doesAccountHaveAccess(Account temp);											// checks if user got access to keep on working with program
 bool isLogInSuccessful(Account temp);												// checks if log-in process is successful
@@ -93,16 +94,16 @@ bool areYouNew(Account temp);														// checks if a user is new to system 
 void showAccountArray(vector<Account> acc);																										// show accounts (4 Admin Only)
 void roleAccessConverter(vector<Account> acc, int curr_acc, string& temp_role, string& temp_access);											// converts role and access numbers (0&1) to words 4 output
 void addAccountInArray(vector<Account>& acc, Account& guest);																					// add account (4 Admin Only)
-void pickAccountInArray(string message4search, string message, vector<Account>& acc, void (*changeAccount)(vector<Account>& acc, int acc_num));	// choose account to edit (4 Admin Only)
-void editAccountMenu(vector<Account>& acc, int acc_num);																						// edit account (4 Admin Only)
-void editLogin(string login_savespot, vector<Account>& acc, int acc_num);																		// change log-in (4 Admin Only)
+void pickAccountInArray(string message4search, string message, vector<Account>& acc, void (*changeAccount)(vector<Account>& acc, int acc_num, string edit_message),string edit_message);	// choose account to edit (4 Admin Only)
+void editAccountMenu(vector<Account>& acc, int acc_num,string edit_message= EDIT_ACCOUNT_MENU);																						// edit account (4 Admin Only)
+//void editLogin(string login_savespot, vector<Account>& acc, int acc_num);																		// change log-in (4 Admin Only)
 template <typename T>
 void edit(vector<Account>& acc, int acc_num, T Account::* field, string dont_message, string input_message);									// change role or access (4 Admin Only)
 //void editRole(vector<Account>& acc, int acc_num);																								// change role (4 Admin Only)
 //void editAccess(vector<Account>& acc, int acc_num);																								// change access (4 Admin Only)
 void searchAccount(string& search_to_edit,string message, vector<Account>& acc, int& counter);													// searching and showing accounts similar 2 input
-void deleteAccountInArray(vector<Account>& acc, int acc_num);																					// delete account (4 Admin Only)
-void changeLogin(vector<Account>& acc, Account& guest);																							// change ones log-in and password
+void deleteAccountInArray(vector<Account>& acc, int acc_num,string you_sure=YOU_SURE_TO_DELETE);																					// delete account (4 Admin Only)
+void changeLogin(vector<Account>& acc, Account& guest, bool& exit_token);																							// change ones log-in and password
 //---------File proccessing functions------------------------------------------------
 void readAccountFile(vector<Account>&acc);													// reads account file
 int countStructuresInAccountFile();															// counts amount of structures in file

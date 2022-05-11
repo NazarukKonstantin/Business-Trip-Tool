@@ -8,7 +8,7 @@ int main()
 	SetConsoleOutputCP(1251);
 	setlocale(LC_ALL, "RUS");
 
-	vector <Account> acc;								//массив аккаунтов
+	vector <Account> acc;
 	Account guest;
 	bool exit_token = false;
 	readAccountFile(acc);
@@ -20,10 +20,12 @@ int main()
 		processTripFile(acc,guest,emp, is_file_open, exit_token);
 		if (!exit_token)
 		{
-			processMainMenu(emp, acc, guest);
+			processMainMenu(emp, acc, guest,exit_token);
 			writeTripFile(emp);
 			clearScreen();
 		}
 	}
+	changeAccActiceStatus(acc,guest,false);
+	writeAccountFile(acc);
 	return 0;
 }
