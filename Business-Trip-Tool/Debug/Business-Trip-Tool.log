@@ -1,2 +1,3 @@
-﻿  Options.cpp
+﻿  Accounts.cpp
+E:\Business-Trip-Tool\Business-Trip-Tool\Accounts.cpp(144,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
   Business-Trip-Tool.vcxproj -> E:\Business-Trip-Tool\Business-Trip-Tool\Debug\Business-Trip-Tool.exe

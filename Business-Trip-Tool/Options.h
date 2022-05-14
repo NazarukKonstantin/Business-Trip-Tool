@@ -22,7 +22,7 @@ struct Trip_Man
 struct Month_Money //being used to count money sum for the required month
 {
 	string currency;
-	double money_per_day=0;
+	double money=0;
 	bool unique = true; //stands for currency uniqueness in system; necessary for sum
 };
 struct Town_Frequency //being used to sort most visited towns in particular period
@@ -39,9 +39,10 @@ const string NO_FILE_ACCESS = "Файл пуст или недоступен для чтения. Выберите дал
 //--------------------DATA INPUT MESSAGES-------------------------------------------------------------------------------------------------------------------------
 const string ENTER_SURNAME="Введите фамилию работника:\n";
 const string ENTER_NAME="Введите имя работника:\n";
-const string ENTER_PATRONYMIC="Введите отчество работника(если у работника нет отчества, введите \"НЕТ\")\n";
+const string ENTER_PATRONYMIC="Введите отчество работника(если у работника нет отчества, введите \"НЕТ\" или \"-\")\n";
 const string ENTER_YEAR="Введите год командировки:\n";
 const string ENTER_MONTH="Введите месяц командировки (номер):\n";
+const string ENTER_MONTH_NAME = "Введите название месяца командировки:\n";
 const string ENTER_TOWN="Введите город назначения командировки:\n";
 const string ENTER_DAYS="Введите количество (только число) выделенных на командировку дней:\n";
 const string ENTER_MONEY="Введите количество (только число) выделенной суммы в расчёте на день:\n";
@@ -78,15 +79,15 @@ const string NAME_HEADER = "---------|ИМЯ|--------";
 const string PATRONYMIC_HEADER = "------|ОТЧЕСТВО|------";
 const string TABLE_TRIP_HEADER = { "|" + F_I_O_HEADER + "|" + YEAR_HEADER + "|" + MONTH_HEADER + "|" + DAYS_HEADER + "|" + MONEY_HEADER + "|" + TOWN_HEADER + "|\n" };
 
-const string MONEY_RES = "Выделенная сумма за указанный месяц составила: ";
+const string MONEY_RES_P1 = "Выделенная сумма за ";
+const string MONEY_RES_P2 = "-го года составила: ";
 
-const string ENTER_MONTH_X = "Введите месяц X (название или номер месяца, с которого начнётся сортировка городов): \n";
-const string ENTER_MONTH_Y = "Введите месяц Y (название или номер месяца, которым закончится сортировка городов): \n";
-const string SORTED_TOWNS_P1 = "Наиболее посещаемые города с месяца \"";
-const string SORTED_TOWNS_P2 = "\" ";
-const string SORTED_TOWNS_P3 = " года по месяц \"";
-const string SORTED_TOWNS_P4 = " года:\n";
-const string TOWN_TABLE_HEADER = "|-------|ГОРОД|-------|-|КОЛ-ВО ПОСЕЩЕНИЙ|-|\n";
+const string ENTER_MONTH_X = "Введите месяц X (номер месяца, с которого начнётся сортировка городов): \n";
+const string ENTER_MONTH_Y = "Введите месяц Y (номер месяца, которым закончится сортировка городов): \n";
+const string SORTED_TOWNS_P1 = "Наиболее посещаемые города с месяца ";
+const string SORTED_TOWNS_P2 = "-го года по месяц ";
+const string SORTED_TOWNS_P3 = "-го года:\n";
+const string TOWN_TABLE_HEADER = "|-------|ГОРОД|------|-|КОЛ-ВО ПОСЕЩЕНИЙ|-|\n";
 
 const string SORT_DIRECTION = "Сортировать по:\n 1.Возрастанию\n 2.Убыванию\n";
 const string SORTED_BY = "Список работников, отстортированный по ";
@@ -105,27 +106,30 @@ const vector<string> MONTH_SET = {"Январь","Февраль","Март","Апрель","Май","Июнь
 const string WRONG_DAYS_P1 = "Ошибка! В данном месяце ";
 const string WRONG_DAYS_P2 = " не содержится такое кол-во дней\n";
 
+const string NO_DATA_FOUND = "Данных, удовлетворяющих запросу, не найдено\n";
+
 //-----NUMERIC CONSTANTS-------
+//-----TABLE LINE LIMITS-------
 const int F_I_O_LINE_LIMIT = 22;
 const int YEAR_LINE_LIMIT = 7;
 const int MONTH_LINE_LIMIT = 13;
 const int DAYS_LINE_LIMIT = 16;
-const int MONEY_LINE_LIMIT = 17;
+const int MONEY_LINE_LIMIT = 14;
 const int MONEY_LINE_LIMIT_2 = 21;
 const int TOWN_LINE_LIMIT = 20;
 const int CURRENCY_LIMIT = 3;
 const int FREQUENCY_LINE_LIMIT = 20;
 
-const int YEAR_INPUT_LIM = 4;
+const int YEAR_INPUT_LIM = 4; //max reasonable digits of year number to input
 
 bool canUserContinue(Account& guest, bool exit_token); //checks user's access and log-in condition to let user use the system
 
-void enterEmployees(vector <Trip_Man>& emp);
+void enterEmployees(vector <Trip_Man>& emp); //also calls enter1Employee()
 void enter1Employee(Trip_Man& temp);
 
-void processTripFile(vector<Account>& acc, Account& guest,vector <Trip_Man>& emp,bool is_file_open, bool& exit_token,string file_name=TRIP_INFO); //reading file with unable to read file situation management
+void processTripFile(vector<Account>& acc, Account& guest,vector <Trip_Man>& emp,bool& is_file_open, bool& exit_token,string file_name=TRIP_INFO); //reading file with unable to read file situation management
 void readTripFile(vector <Trip_Man>& emp, bool& is_file_open, string file_name);
-int countStructuresInTripFile(bool& is_file_open,string file_name);
+int countStructuresInTripFile(bool& is_file_open,string file_name); // counts amount of structures in file
 void writeTripFile(vector<Trip_Man> emp);
 
 void processMainMenu(vector <Trip_Man>& emp,vector<Account>& acc, Account& guest, bool& exit_token);
@@ -133,53 +137,51 @@ void processAccountMenu(vector<Account>& acc, Account& guest, bool& exit_token);
 void processTripMenu(vector<Trip_Man>&emp, Account guest);
 void processDataChangeMenu(vector<Trip_Man>& emp);
 
-void showTripArray(vector<Trip_Man>emp, int c_length=0);
-string doubleToString(double value);
-void showOneEmployee(vector<Trip_Man>emp, int curr_emp, int c_length = 0);
+void tripHeaderOutput(int c_length = 0, string counter="");
+void showTripArray(vector<Trip_Man>emp); //shows data array
+string doubleToString(double value); //converts double value to string with two decimals after comma
+void showOneEmployee(vector<Trip_Man>emp,int curr_emp, int c_length = 0);
 void showOneEmployee(string surname=SURNAME_HEADER, string name=NAME_HEADER, string patronymic=PATRONYMIC_HEADER, string year = YEAR_HEADER, string month = MONTH_HEADER,
-					string days=DAYS_HEADER, string money = MONEY_HEADER, string currency = "***", string town = TOWN_HEADER);
-void countMoney4MonthX(vector<Trip_Man> emp);
+					string days=DAYS_HEADER, string money = MONEY_HEADER, string currency = "***", string town = TOWN_HEADER); //is used for adding employees
+void countMoney4MonthX(vector<Trip_Man> emp); //also calls countMoney()
 string countMoney(vector<Month_Money> value);
 
-void sortTowns(vector<Trip_Man> emp);
-
-int enterMonth(vector<Trip_Man> emp,string message, string& month);
-//int convertMonthName2Number(string& month, int str_size);
-void fillTowns2SortArray(vector<Town_Frequency>& town_set,vector<Trip_Man> emp, int year_x, int year_y, int X, int Y);
-//write1TownInTownSet - filling town set with towns visited since month X of year X till month Y of year_y
+void sortTowns(vector<Trip_Man> emp); //function performing individual task - sorting most visited towns from month X to month Y
+int enterMonth(vector<Trip_Man> emp,string message, string& month); //month X and month Y input
+//fillTowns2TownSet - filling town set with towns (calls write1TownInTownSet()) visited since month X of year X till month Y of year_y
+void fillTowns2TownSet(vector<Town_Frequency>& town_set,vector<Trip_Man> emp, int year_x, int year_y, int X, int Y);
+//write1TownInTownSet - writes one town in town set
 void write1TownInTownSet(vector<Trip_Man> emp, vector<Town_Frequency>& town_set, Town_Frequency temp, int emp_size, int X, int year_x);
 //writeTownsInSortArray - filling new array with unique towns of town_set array
 void writeTownsInSortArray(vector<Town_Frequency> town_set, vector<Town_Frequency>&picked_towns);
-//bool sortByFrequency(Town_Frequency first, Town_Frequency second, int choice=1);
-void showSortedTowns(vector<Town_Frequency> picked_towns, int X, int Y, int year_x, int year_y, vector<Trip_Man>emp);
+void showSortedTowns(vector<Town_Frequency> picked_towns, string month_x, string month_y, int year_x, int year_y, vector<Trip_Man>emp);
 
 void searchMenu(vector<Trip_Man>& emp,int& counter);
 
 template<typename T>
-void searchData(string message, vector<Trip_Man>& emp, T Trip_Man::* field, int& counter, char(*inputCondition)()=onlyLetterInput);
-template <typename T>
-bool doLettersMatch(string search_input, int current_letter, vector<Trip_Man>& emp, T Trip_Man::* field, int curr_emp);
-bool doLettersMatch(string search_input, int current_letter, vector<Trip_Man>& emp, string Trip_Man::* field, int curr_emp);
-template <typename T>
-int defineSearchSize(string search_input, vector<Trip_Man>& emp, T Trip_Man::* field, int curr_emp);
-int defineSearchSize(string search_input, vector<Trip_Man>& emp, string Trip_Man::* field, int curr_emp);
+void searchData(string message, vector<Trip_Man>& emp, T Trip_Man::* field, int& counter, 
+	bool (*searchCondition) (vector<Trip_Man> emp, T Trip_Man::* field, string search_input, int curr_emp),
+	char(*inputCondition)() = onlyLetterInput);
+
+bool searchString(vector<Trip_Man> emp, string Trip_Man::* field, string search_input, int curr_emp);
+bool searchInt(vector<Trip_Man> emp, int Trip_Man::* field, string search_input, int curr_emp);
+bool searchDouble(vector<Trip_Man> emp, double Trip_Man::* field, string search_input, int curr_emp);
 
 void sortMenu(vector<Trip_Man> emp);
 template <typename T>
-void sortData(string message, vector<Trip_Man>emp, T Trip_Man::* temp);
+void sortData(string message, vector<Trip_Man>emp, T Trip_Man::* temp); //let user choose direction of sorting and calls mySort()
 
 template <typename T, typename J>
 void mySort(vector<J>&vec, T J::* temp, int direction=1);
 
-void pickDataInArray(string message, vector<Trip_Man>& emp, void (*changeData)(vector<Trip_Man>& emp, int curr_emp));
+void pickDataInArray(string message, vector<Trip_Man>& emp, void (*changeData)(vector<Trip_Man>& emp, int curr_emp)); //in edit and delete cases makes user choose data to edit/delete
 void editDataMenu(vector<Trip_Man>& emp, int curr_emp);
-void formatString(string& temp);
+void formatString(string& temp); //makes strings start with a capital letter and end with small ones; also works with complex names like New-York and so on
 void inputSurname(Trip_Man& temp);
 void inputName(Trip_Man& temp);
-void inputPatronymic(Trip_Man& temp); //also checks if employer's got patronymic (patronymic input)
+void inputPatronymic(Trip_Man& temp); //also asks if employee's got patronymic
 void inputYear(Trip_Man& temp);
 void inputMonth(Trip_Man& temp);
-//bool isMonth(string input_month);
 void inputDays(Trip_Man& temp);
 void inputMoney(Trip_Man& temp);
 void inputCurrency(Trip_Man& temp);

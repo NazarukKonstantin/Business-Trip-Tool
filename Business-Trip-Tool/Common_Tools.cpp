@@ -37,7 +37,8 @@ void clearStream()
 }
 void clearScreen()
 {
-	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //handle is an abstract reference to a resource that is used when application 
+													  //software references blocks of memory or objects that are managed by another system like a database or an operating system
 	COORD coordScreen = { 0, 0 };    // home for the cursor
 	DWORD cCharsWritten;			 // number of characters written
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -147,24 +148,43 @@ double inputDouble(string message, int limit)
 {
 	string st;
 	char temp;
+	int comma_index = 0;
 	cout << message;
 	do
 	{
-		temp = _getch();
+		temp = onlyNumInput();
 		if (temp == '\b' && st.size() != 0) //removes symb from the screen if backspace key's pressed
 		{
 			st.erase(st.end() - 1);
 			cout << temp << " " << temp;
+			if (none_of(st.begin(), st.end(), [](char a) {return a == ',';})) //if no commas in string
+				comma_index=0;
 		}
-		else if (temp != '\r' && temp != ' ') // if enter key isn't pressed writes symbol down in input_password
+		else if (temp != '\r') // if enter key isn't pressed writes symbol down in input_password
 		{
-			if (!st.size())
+			int st_size = st.size();
+			if (!st_size)
 			{
-				if (temp >= '1' && temp <= '9')
+				comma_index = 0;
+				if (temp >= '0' && temp <= '9')
 				{
 					cout << temp;
 					st.push_back(temp);
+					if (temp == '0')
+					{
+						temp = ',';
+						cout << temp;
+						st.push_back(temp);
+						comma_index++;
+					}
 				}
+			}
+			else if(st_size==1&&st.at(0)=='0')
+			{
+				cout << ',' << temp;
+				st.push_back(',');
+				st.push_back(temp);
+				comma_index++;
 			}
 			else
 			{
@@ -173,65 +193,27 @@ double inputDouble(string message, int limit)
 					cout << temp;
 					st.push_back(temp);
 				}
-				else if ((temp == ',') && stoi(st))
+				else if ((temp == ',') && !comma_index)
 				{
+					comma_index++;
 					cout << temp;
 					st.push_back(temp);
-					while (temp != '\r')
-					{
-						temp = _getch();
-						if (temp == '\b' && st.size() != 0) //removes symb from the screen if backspace key's pressed
-						{
-							st.erase(st.end() - 1);
-							cout << temp << " " << temp;
-						}
-						if (temp >= '0' && temp <= '9')
-						{
-							cout << temp;
-							st.push_back(temp);
-						}
-					}
 				}
 			}
 		}
+		if (st.size()>limit)
+		{
+			cout << endl;
+			cout << TOO_BIG_STRING;
+			system("pause");
+			st.clear();
+		}
+
 	} while (temp != '\r'||!st.size()); cout << endl; //when enter key's pressed finishes input process
 	if (st[st.size() - 1] == '.' || st[st.size() - 1] == ',') st.push_back('0');
 	return stod(st);
 }
 
-//string justEnterString(char(*inputCondition)())
-//{
-//	string temp;
-//	getline(cin, temp);
-//	return temp;
-//}
-//string onlyLettersInput(char(*inputCondition)())
-//{
-//	string temp;
-//	while (true)
-//	{
-//		getline(cin, temp);
-//		int str_size = temp.size();
-//		int amount_of_letters = 0;
-//		for (int curr_symbol = 0; curr_symbol < str_size; curr_symbol++)
-//		{
-//			char curr_symb = temp.at(curr_symbol);
-//			if ((curr_symb >= 'A' && curr_symb <= 'Z') || (curr_symb >= 'a' && curr_symb <= 'z') ||
-//				(curr_symb >= 'À' && curr_symb <= 'ß' || (curr_symb >= 'à' && curr_symb <= 'ÿ')))
-//			{
-//				amount_of_letters++;
-//			}
-//		}
-//		if (amount_of_letters == str_size)
-//		{
-//			return temp;
-//		}
-//		else
-//		{
-//			cout << ERROR_INPUT;
-//		}
-//	}
-//}
 
 char justEnterChar()
 {
@@ -242,7 +224,7 @@ char onlyLetterInput()
 	while (true)
 	{
 		char temp = _getch();
-		if ((temp >= 'À' && temp <= 'ß') || (temp >= 'à' && temp <= 'ÿ')||
+		if ((temp >= 'À' && temp <= 'ß') || (temp >= 'à' && temp <= 'ÿ')||temp=='¸'||temp=='¨'||
 			temp=='_'||temp=='-' || temp == '\b' || temp == '\r')
 		{
 			return temp;
@@ -290,7 +272,7 @@ string oneWordInput(char(*inputCondition)())
 			temp.erase(temp.end() - 1);
 			cout << symb << " " << symb;
 		}
-		else if (symb != '\r'&& symb != ' ') // if enter key isn't pressed writes symbol down in input_password
+		else if (symb != '\r'&& symb != ' '&& symb!='\b') // if enter key isn't pressed writes symbol down in input_password
 		{
 			cout << symb;
 			temp.push_back(symb);
